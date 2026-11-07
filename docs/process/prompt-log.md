@@ -257,7 +257,8 @@ make the commit baseline and store this moc
 - Kiểm tra trước lưu: index ban đầu trống; repository module có danh tính Git được cấu hình sẵn, giữ nguyên. PDF chuyển từ btcohong.pdf sang docs/requirements/btcohong.pdf giống từng byte bản HEAD, SHA-256 `8514A086A403AC4B1B57EEE4993894230677525FC66D19F7CDA9C827D057E436`.
 - Cách lưu: commit đầu chứa baseline thật; tag `payment-management-design-baseline-v1` trỏ mốc đó. Commit kế tiếp lưu SHA đầy đủ trong docs/process/baselines/payment-management-initial.md, cập nhật nhật ký/liên kết; không amend/rebase/reset hoặc push. Không yêu cầu một commit chứa SHA của chính nó.
 - Review: chưa mở R001, chưa có Reviewer/findings/đánh giá nhóm. Khi giao review, dùng baseline_commit từ hồ sơ mốc và đọc đúng commit; không dùng HEAD biến động thay SHA cố định.
-- Kết quả thực tế: đang chuẩn bị commit; SHA và kiểm chứng sau lưu sẽ được ghi bằng commit hồ sơ kế tiếp.
+- Kết quả thực tế: đã tạo baseline_commit `44c586c47105a9107af9673ff56604e83bd07ece`, tag `payment-management-design-baseline-v1` giải tham chiếu đúng SHA này; 27 đường dẫn thay đổi, PDF được Git nhận diện rename 100%. Đã kiểm phạm vi stage, đủ 8 tài liệu/6 PlantUML/6 PNG và 120 liên kết nội bộ có đích trong index; `git diff --cached --check` đạt.
+- Lưu hồ sơ mốc tại [payment-management-initial.md](baselines/payment-management-initial.md) bằng commit kế tiếp, cùng cập nhật liên kết README và mục nhật ký này. Mốc baseline là commit thiết kế nêu trên, không phải commit chứa hồ sơ mốc. Chưa có revised_commit hoặc review thực tế; không push.
 
 ## Mẫu cho lượt tiếp theo
 

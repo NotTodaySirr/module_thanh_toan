@@ -4,7 +4,7 @@
 - Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
 - Ngày: 07/11/2026, Asia/Bangkok. Người soạn: Codex / System Design Agent; người dùng trong phiên đã phê duyệt tại PRM-008, chưa cung cấp tên cá nhân.
 - Nguồn: [PDF gốc, 3 trang](../../requirements/btcohong.pdf), [phân tích BA](../../analysis/payment-management/requirements-analysis.md), [14 quyết định đã xác nhận PRM-006](../../analysis/payment-management/decisions.md).
-- Loại mốc: **Thiết kế lần chạy đầu**. Vòng review: chưa mở. Người dùng yêu cầu lưu baseline tại PRM-009; mốc được định danh bằng tag `payment-management-design-baseline-v1`.
+- Loại mốc: **Thiết kế lần chạy đầu**. Vòng review: chưa mở. Đã lưu baseline tại PRM-009, tag `payment-management-design-baseline-v1`; xem [hồ sơ mốc và SHA đầy đủ](../../process/baselines/payment-management-initial.md).
 
 ## 1. Tài liệu
 
@@ -44,4 +44,4 @@ PlantUML là nguồn chỉnh sửa, PNG là bản xem phát sinh; sửa sơ đ�
 
 ## 4. Baseline trước review
 
-Theo yêu cầu PRM-009, lưu baseline chứa thiết kế đã phê duyệt, hồ sơ BA, PDF nguồn ở vị trí hiện tại và nhật ký liên quan. Tag `payment-management-design-baseline-v1` định danh mốc thiết kế lần đầu trước review; SHA đầy đủ được lưu bằng commit hồ sơ kế tiếp để tránh tự tham chiếu. Commit hướng dẫn `72ec6f0` không phải baseline thiết kế. Chưa mở vòng review hoặc điền đánh giá nhóm. Reviewer phải đọc đúng SHA của mốc; quy trình tại [hướng dẫn review](../../reviews/README.md).
+Đã lưu baseline `44c586c47105a9107af9673ff56604e83bd07ece` theo yêu cầu PRM-009, gồm thiết kế đã phê duyệt, hồ sơ BA, PDF nguồn ở vị trí hiện tại và nhật ký liên quan. Tag `payment-management-design-baseline-v1` định danh mốc thiết kế lần đầu trước review; [hồ sơ mốc](../../process/baselines/payment-management-initial.md) được lưu bằng commit kế tiếp để tránh tự tham chiếu. Commit hướng dẫn `72ec6f0` không phải baseline thiết kế. Chưa mở vòng review hoặc điền đánh giá nhóm. Reviewer phải đọc đúng SHA của mốc; quy trình tại [hướng dẫn review](../../reviews/README.md).
