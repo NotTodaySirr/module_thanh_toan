@@ -1,0 +1,178 @@
+@startuml
+title Payment-management - lớp nghiệp vụ và cổng ứng dụng (TO-BE)
+caption Nguồn: PDF trang 1-3, US-PAY-01..05, PAY-01..08, NFR-PAY-01/02; PAY-DEC-001..014.\nThiết kế kỹ thuật được người dùng phê duyệt (PRM-008).
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Nghiệp vụ" as Domain {
+  enum PaymentStatus {
+    Draft
+    PendingApproval
+    Approved
+    Rejected
+    Cancelled
+  }
+  class PaymentChain {
+    +id: Id
+    +rootDocumentId: Id
+    +currentApprovedDocumentId: Id [0..1]
+    +activeAdjustmentId: Id [0..1]
+    +version: Integer
+    +reserveAdjustment(baseId: Id)
+    +activateApproved(documentId: Id)
+  }
+  class PaymentDocument {
+    +id: Id
+    +kind: OriginalOrAdjustment
+    +status: PaymentStatus
+    +originalCreatorId: SubjectId
+    +createdBy: SubjectId
+    +responsibleId: SubjectId
+    +baseApprovedDocumentId: Id [0..1]
+    +version: Integer
+    +submit(actor, assignment): Submission
+    +approve(actor, submissionId)
+    +reject(actor, submissionId, reason)
+    +reopen(actor): PaymentRevision
+    +cancel(actor, reason)
+  }
+  class PaymentRevision {
+    +id: Id
+    +revisionNo: Integer
+    +note: String
+    +exactTotal: ExactDecimal
+    +officialTotal: WholeVnd
+    +adjustmentReason: String [0..1]
+    +delta: WholeVnd [0..1]
+    +copyWithNotes(notes): PaymentRevision
+  }
+  class PaymentLine {
+    +lineKey: String
+    +serviceId: ExternalId
+    +sourceQuantityId: ExternalId
+    +priceId: ExternalId
+    +serviceFrom: Date
+    +serviceTo: Date
+    +quantity: ExactDecimal
+    +unitPrice: ExactDecimal
+    +exactAmount: ExactDecimal
+    +amount: WholeVnd
+    +note: String
+  }
+  class SourceSnapshot {
+    +id: Id
+    +semanticHash: String
+    +payload: CanonicalData
+    +sourceVersions: VersionVector
+    +observedAt: Instant
+    +consistencyProof: Data
+  }
+  class Submission {
+    +id: Id
+    +roundNo: Integer
+    +requiredRole: KTTorGDKD
+    +assignedTo: SubjectId
+    +assignmentVersion: Integer
+    +state: OpenOrDecided
+    +reason: String [0..1]
+    +recordDecision(actor, decision, reason)
+    +reassign(actor, assignee, authorityRef)
+  }
+  class Evidence {
+    +id: Id
+    +documentCode: String
+    +documentDate: Date
+    +confirmedParties: String [1..*]
+    +checksum: String
+    +blobRef: String
+  }
+  class MoneyCalculator {
+    +calculate(bundle): CalculationResult
+  }
+  class ApprovalPolicy {
+    +select(total, unit, excludedSubjects): Assignment
+  }
+}
+
+package "Điều phối và cổng" as Application {
+  class PaymentService {
+    +createOriginal(command)
+    +editNotes(id, command)
+    +previewRefresh(id)
+    +acceptRefresh(id, token)
+    +submit(id)
+    +approve(id, submissionId)
+    +reject(id, submissionId, reason)
+    +reopen(id)
+    +cancel(id, reason)
+    +createAdjustment(baseId, command)
+    +reassignApprover(id, command)
+    +transferResponsibility(id, command)
+  }
+  interface SourceGateway {
+    +load(contractId, period, mode): SourceBundle
+    +compare(snapshot, bundle): SourceDiff
+  }
+  interface AssignmentDirectory {
+    +authorize(actor, action, document)
+    +resolveApprover(unit, role, excluded): Assignment
+  }
+  interface PaymentRepository {
+    +loadForUpdate(chainId, documentId)
+    +save(aggregate)
+  }
+  interface UnitOfWork {
+    +transaction(work)
+  }
+  interface EvidenceStore {
+    +register(file, metadata): Evidence
+    +read(id)
+  }
+  class NotificationDispatcher {
+    +dispatch(outboxId)
+    +retry(notificationId)
+  }
+  interface NotificationChannel {
+    +send(recipient, submissionRef): DeliveryResult
+  }
+}
+
+PaymentChain "1" -- "1..*" PaymentDocument : chứa hồ sơ
+Application -[hidden]down-> Domain
+SourceGateway -[hidden]down-> AssignmentDirectory
+AssignmentDirectory -[hidden]down-> EvidenceStore
+PaymentRepository -[hidden]down-> UnitOfWork
+UnitOfWork -[hidden]down-> NotificationChannel
+PaymentDocument "0..*" --> "0..1" PaymentDocument : baseApproved
+PaymentDocument "1" *-- "1..*" PaymentRevision : lịch sử nội dung
+PaymentDocument "1" *-- "0..*" Submission : lần trình
+PaymentRevision "1" *-- "0..*" PaymentLine : dòng theo đoạn giá
+PaymentRevision "0..*" --> "1" SourceSnapshot : căn cứ bất biến
+PaymentRevision "0..*" --> "0..1" Evidence : biên bản
+Submission "0..1" --> "1" PaymentRevision : cố định nội dung
+PaymentDocument --> PaymentStatus
+PaymentService ..> PaymentDocument
+PaymentService ..> PaymentChain
+PaymentService ..> SourceGateway
+PaymentService ..> AssignmentDirectory
+PaymentService ..> PaymentRepository
+PaymentService ..> UnitOfWork
+PaymentService ..> MoneyCalculator
+PaymentService ..> ApprovalPolicy
+PaymentService ..> EvidenceStore
+ApprovalPolicy ..> AssignmentDirectory
+NotificationDispatcher ..> PaymentRepository
+NotificationDispatcher ..> NotificationChannel
+
+note bottom of PaymentChain
+  Một Original; nhiều Adjustment nối tiếp.
+  Tối đa một điều chỉnh Draft/PendingApproval/Rejected.
+  Tổng hiệu lực lấy bản Approved hiện hành, không cộng các bản.
+end note
+note bottom of PaymentRevision
+  Revision append-only; reopen tạo bản sao mới.
+  Decimal chính xác; HALF_UP từng dòng đến đồng.
+  Không sửa Approved; quyền xử lý không thay creator.
+end note
+@enduml

@@ -1,0 +1,73 @@
+@startuml
+title Payment-management - duyệt, từ chối và mở lại
+caption US-PAY-03; PAY-05..08; NFR-PAY-01; PAY-DEC-002/003/009/011/012/014. TO-BE đề xuất kỹ thuật.
+skinparam defaultFontName Arial
+autonumber
+actor "Người đang được giao\nKTT/GĐKD theo tổng" as Reviewer
+actor "Phụ trách\nNVKD/KTT điều chỉnh" as Owner
+boundary PaymentApi as Api
+control PaymentService as Service
+participant SourceGateway as Source
+participant AssignmentDirectory as Auth
+database "PaymentRepository\nUnitOfWork" as Repo
+
+Reviewer -> Api : A07 POST /{id}/approval-decisions\nsubmissionId, decision, reason, If-Match, key
+Api -> Service : approve(...) / reject(...), ActorContext
+Service -> Auth : authorize(actor, decision, document)\nrole + unit + assignedTo + loại hai người lập
+Auth --> Service : hợp lệ / bị chặn
+alt sai quyền/người cũ/người lập tự xử lý
+  Service --> Api : FORBIDDEN / NOT_ASSIGNED / SELF_APPROVAL
+  Api --> Reviewer : 403; không quyết định
+else đúng quyền và PendingApproval
+  alt decision=Approve
+    Service -> Source : load + compare với snapshot lần trình
+    Source --> Service : hợp lệ không đổi / đổi ảnh hưởng / không đọc được
+    alt nguồn đổi hoặc không còn hợp lệ
+      Service --> Api : SOURCE_CHANGED / SOURCE_INVALID
+      Api --> Reviewer : 409/422, giữ chờ; cảnh báo và cho nhập lý do từ chối
+    else nguồn không đọc được
+      Service --> Api : SOURCE_UNAVAILABLE
+      Api --> Reviewer : 503, giữ PendingApproval; không tự reject
+    else nguồn hợp lệ không đổi
+      group TX-DECIDE
+        Service -> Repo : khóa chain/document/submission\nkiểm version, assignment hiện hành, độc lập
+        Service -> Repo : ghi một Approved + audit + currentApproved\ndừng outbox + receipt; commit
+        Repo --> Service : kết quả/ETag; conflict nếu lệnh khác thắng
+      end
+      Service --> Api : Approved hoặc lỗi conflict/quyền hiện hành
+      Api --> Reviewer : 200 / 412 / 403 / 409
+    end
+  else decision=Reject
+    alt trim(reason) rỗng
+      Service --> Api : REASON_REQUIRED
+      Api --> Reviewer : 422; giữ PendingApproval
+    else có lý do
+      group TX-DECIDE
+        Service -> Repo : khóa; kiểm lại version/assignment/độc lập
+        Service -> Repo : Rejected + reason + audit\ndừng outbox + receipt; commit
+        Repo --> Service : kết quả/ETag hoặc conflict
+      end
+      Service --> Api : Rejected, giữ revision đã trình
+      Api --> Reviewer : 200 (không tự về Draft)
+    end
+  end
+end
+
+opt hồ sơ đã Rejected và người phụ trách muốn sửa
+  Owner -> Api : A08 POST /{id}/reopenings, {}, If-Match, key
+  Api -> Service : reopen(id)
+  Service -> Auth : authorize(actor, reopen, document)
+  Auth --> Service : quyền phụ trách hiện hành
+  group TX-STATE
+    Service -> Repo : khóa/version; Rejected -> Draft\nrevision sao chép mới, audit Reopened + receipt
+    Repo --> Service : Draft/ETag; giữ submission/reason cũ
+  end
+  Service --> Api : Document Draft, tiền chưa đổi
+  Api --> Owner : 200; sửa/cập nhật/hủy/trình ở thao tác sau
+end
+note over Reviewer,Repo
+  Reassign A12 giữ role và submission, tăng assignmentVersion/documentVersion.
+  Approve/reject/reassign đồng thời chỉ một kết quả hợp lệ sau khóa/version.
+  Reject không cần đọc nguồn thành công nhưng bắt buộc lý do và độc lập.
+end note
+@enduml

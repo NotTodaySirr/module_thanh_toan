@@ -1,0 +1,69 @@
+@startuml
+title Payment-management - lập Draft và cập nhật căn cứ có chấp nhận
+caption US-PAY-01/05; PAY-01..04; NFR-PAY-01/02; PAY-DEC-004..012. TO-BE đề xuất kỹ thuật.
+skinparam defaultFontName Arial
+autonumber
+actor "NVKD phụ trách" as User
+boundary PaymentApi as Api
+control PaymentService as Service
+participant SourceGateway as Source
+participant MoneyCalculator as Calc
+database "PaymentRepository\nUnitOfWork" as Repo
+
+User -> Api : A01 POST /payment-documents\ncontractId, period, replacement?, key
+Api -> Service : createOriginal(command), ActorContext
+Service -> Service : xác thực/quyền phụ trách, kiểm receipt
+Service -> Source : load(contractId, period, Original)
+Source --> Service : bundle coherent hoặc lỗi
+alt không Active / chưa đối soát / kỳ lẻ chưa rõ / giá thiếu-trùng / phân bổ thiếu
+  Service --> Api : SOURCE_INVALID / lỗi nguồn cụ thể
+  Api --> User : 422 hoặc 503; không tạo Draft/claim
+else nguồn hợp lệ
+  Service -> Calc : calculate(bundle)
+  Calc --> Service : lines theo đoạn giá, exactTotal, officialTotal
+  group TX-CREATE
+    Service -> Repo : claim tháng theo thứ tự; khóa/unique DB
+    alt tháng đã bị chiếm (kể cả tháng/quý đồng thời)
+      Repo --> Service : PERIOD_CONFLICT; rollback toàn bộ
+    else đủ 1/3 tháng
+      Service -> Repo : chain + Draft + revision/lines/snapshot\n+ audit Created + receipt; commit
+      Repo --> Service : Document/ETag mới
+    end
+  end
+  Service --> Api : Document hoặc PERIOD_CONFLICT
+  Api --> User : 201 Draft đã lưu / 409 không chồng kỳ
+end
+
+== Sau đó, chủ động cập nhật nguồn của Draft ==
+User -> Api : A04 POST /{id}/source-previews, If-Match
+Api -> Service : previewRefresh(id)
+Service -> Source : load + compare toàn bộ căn cứ liên quan
+Source --> Service : bundle mới và diff
+Service -> Calc : calculate(bundle mới)
+Calc --> Service : candidate lines/totals
+Service -> Repo : lưu candidate gắn actor/document/baseVersion, hạn 15 phút
+Repo --> Service : previewToken, diff, unmappedLineNotes
+Service --> Api : preview có tổng mới và ghi chú mất ánh xạ
+Api --> User : 200 xem trước; Draft/tiền cũ chưa đổi
+User -> Api : A05 POST /{id}/source-refreshes\npreviewToken, accept=true, If-Match, key
+Api -> Service : acceptRefresh(id, token)
+Service -> Source : đọc lại, xác minh vẫn khớp semanticHash candidate
+Source --> Service : matching / changed / unavailable
+alt candidate hết hạn / nguồn đổi / version không khớp
+  Service --> Api : PREVIEW_EXPIRED / SOURCE_CHANGED / VERSION_CONFLICT
+  Api --> User : 409 / 412 / 503; không cập nhật một phần
+else nguồn khớp, chấp nhận toàn bộ và note không ánh xạ đã được báo
+  group TX-EDIT
+    Service -> Repo : khóa chain/document; kiểm version/candidate chưa dùng
+    Service -> Repo : revision/lines/snapshot mới + audit trước-sau\n+ consume token + receipt; commit
+    Repo --> Service : Document/ETag mới
+  end
+  Service --> Api : Document tiền mới đã xác nhận
+  Api --> User : 200; trình ở thao tác sau, không tự trình
+end
+note over User,Repo
+  A03 sửa ghi chú chỉ sao chép revision và giữ tiền/căn cứ, có audit.
+  Hợp đồng/kỳ bất biến; sai thì A09 hủy Draft, lập mã mới A01.
+  Lập thay thế vẫn kiểm nguồn/cấu hình và claim mọi tháng.
+end note
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+title Payment-management - vòng đời một hồ sơ Original hoặc Adjustment
+caption Nguồn: PDF trang 1 mục 3; trang 2 US-PAY-01..05, PAY-04..08; PAY-DEC-001..014.\nTO-BE đề xuất kỹ thuật; vòng đời từng hồ sơ, không phải toàn chuỗi.
+skinparam defaultFontName Arial
+hide empty description
+
+[*] --> Draft : createOriginal / createAdjustment\n[đúng quyền, nguồn và kỳ/base hợp lệ] / audit
+Draft : editNotes [phụ trách] / revision mới, tiền giữ nguyên, audit
+Draft : acceptRefresh [đã xem candidate, nguồn vẫn khớp]
+Draft : / cập nhật toàn bộ căn cứ và tiền, audit
+Draft --> PendingApproval : submit [nguồn hợp lệ/không đổi; đủ dịch vụ; hai tổng >= 0;\nđúng người duyệt độc lập; điều chỉnh đủ biên bản]\n/ cố định revision, submission + outbox + audit
+PendingApproval : submit lặp [đúng quyền] / trả submission hiện hữu; không outbox mới
+PendingApproval : reassignApprover [cùng vai trò, độc lập]
+PendingApproval : / audit, vô hiệu thông báo cũ, giao người mới
+PendingApproval : nguồn đổi / chặn approve, cảnh báo; không tự reject
+PendingApproval : nguồn không đọc được / chờ kiểm tra lại
+PendingApproval : gửi lỗi hoặc retry / ghi lịch sử gửi
+PendingApproval --> Approved : approve [được giao, đúng role, độc lập,\nnguồn vẫn hợp lệ/không đổi ảnh hưởng]\n/ một kết quả, audit, cập nhật con trỏ chain
+PendingApproval --> Rejected : reject [được giao, độc lập, lý do không rỗng]\n/ giữ nội dung đã trình, audit
+Rejected --> Draft : reopen [phụ trách]\n/ sao chép revision mới, giữ tiền/lý do cũ, audit
+Draft --> Cancelled : cancel [phụ trách, lý do không rỗng]\n/ audit, giải phóng claim gốc hoặc slot điều chỉnh
+
+Approved : createAdjustment [KTT, bản hiện hành, chưa có hồ sơ đang xử lý]
+Approved : / tạo ĐỐI TƯỢNG KHÁC ở Draft; giữ nguyên hồ sơ Approved này
+Cancelled : Không phục hồi/sửa/trình chính hồ sơ này
+Cancelled : Có thể lập gốc mới mã khác nếu kiểm tra nguồn/kỳ hợp lệ
+
+note right of Approved
+  Không đặt Approved là final state tuyệt đối.
+  Điều chỉnh duyệt riêng theo tổng đầy đủ mới;
+  không sửa bản cũ và không cộng lặp tổng.
+  Bàn giao kế toán thủ công ngoài module.
+end note
+note left of Draft
+  Gốc: phụ trách NVKD.
+  Điều chỉnh: phụ trách KTT.
+  Claim tháng thuộc gốc; điều chỉnh không chiếm lại.
+end note
+note bottom of Cancelled
+  Hủy điều chỉnh không giải phóng tháng của gốc Approved.
+  Rejected phải reopen trước hủy hoặc trình lại.
+end note
+@enduml

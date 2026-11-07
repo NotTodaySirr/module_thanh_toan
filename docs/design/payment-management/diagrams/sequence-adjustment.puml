@@ -1,0 +1,74 @@
+@startuml
+title Payment-management - điều chỉnh liên kết, giữ nguyên Approved
+caption US-PAY-04; PAY-03..08; NFR-PAY-01; PAY-DEC-001/002/003/007/008/009/011/012/013. TO-BE đề xuất kỹ thuật.
+skinparam defaultFontName Arial
+autonumber
+actor "KTT phụ trách" as KTT
+actor "Người duyệt độc lập" as Reviewer
+boundary PaymentApi as Api
+control PaymentService as Service
+participant SourceGateway as Source
+participant EvidenceStore as Evidence
+participant MoneyCalculator as Calc
+database "PaymentRepository\nUnitOfWork" as Repo
+
+KTT -> Api : A16 POST /evidence, file + mã/ngày/các bên, key
+Api -> Evidence : register(file, metadata)
+Evidence --> Api : evidenceId, checksum
+Api --> KTT : 201 EvidenceRef
+KTT -> Api : A10 POST /{approvedId}/adjustments\nreason, evidenceId, If-Match, key
+Api -> Service : createAdjustment(baseId, command)
+Service -> Service : kiểm quyền KTT/đơn vị/phụ trách
+Service -> Evidence : read(evidenceId), xác minh metadata/blob
+Evidence --> Service : chứng cứ hợp lệ hoặc lỗi
+Service -> Source : load(contractId, period, Adjustment)
+Source --> Service : nguồn sửa được xác nhận và coherent
+note over Service,Source
+  Hợp đồng đã kết thúc: kỳ thuộc thời gian hiệu lực,
+  giá/sản lượng sửa có xác nhận và đủ biên bản.
+  Ngoại lệ này không áp cho lập bảng gốc.
+end note
+Service -> Calc : calculate(bundle) - toàn bộ dòng/tổng mới
+Calc --> Service : exactTotal, officialTotal, lines
+group TX-ADJUST
+  Service -> Repo : khóa chain, kiểm base=currentApproved, chưa có activeAdjustment
+  alt base cũ hoặc có Draft/PendingApproval/Rejected điều chỉnh
+    Repo --> Service : STALE_BASE / ADJUSTMENT_IN_PROGRESS; rollback
+  else hợp lệ
+    Service -> Repo : Adjustment Draft + revision/snapshot/lines\nbaseApprovedId, delta, activeAdjustmentId, audit, receipt
+    Repo --> Service : hồ sơ mới; không sửa Approved/không claim tháng mới
+  end
+end
+Service --> Api : Draft điều chỉnh hoặc lỗi
+Api --> KTT : 201 / 409 / 422 / 503
+
+opt Draft điều chỉnh hợp lệ
+  KTT -> Api : A06 POST /{adjustmentId}/submissions, If-Match, key
+  Api -> Service : submit(adjustmentId)
+  ref over Service,Repo : sequence.puml: recheck nguồn, đủ biên bản, role theo tổng đầy đủ mới; loại người lập gốc và điều chỉnh
+  Service --> Api : receipt PendingApproval, assignedTo
+  Api --> KTT : 201; tổng gốc chưa đổi hiệu lực
+
+  Reviewer -> Api : A07 POST /{adjustmentId}/approval-decisions\ndecision, submissionId, If-Match, key
+  Api -> Service : approve(...) / reject(...)
+  ref over Service,Repo : sequence-review.puml: kiểm nguồn/quyền/độc lập và xử lý lỗi trước quyết định
+  group TX-DECIDE - nếu guard đã đạt
+    Service -> Repo : khóa chain/document/submission, kiểm lại version và quyền
+    alt Approved
+      Service -> Repo : Approved + currentApproved = adjustmentId\nclear activeAdjustment + audit + receipt; commit
+      Repo --> Service : tổng hiệu lực mới; giữ bản cũ nguyên vẹn
+    else Rejected có lý do
+      Service -> Repo : Rejected + reason + audit + receipt; commit\ncurrentApproved không đổi, slot còn giữ
+      Repo --> Service : kết quả từ chối
+    end
+  end
+  Service --> Api : kết quả quyết định
+  Api --> Reviewer : 200; Approved: 480 -> 510, delta +30, không 990\nRejected: KTT reopen trước sửa/trình/hủy
+end
+note over KTT,Repo
+  Hủy Draft điều chỉnh: clear slot, không giải phóng tháng gốc.
+  Bàn giao kế toán thủ công sau Approved, đối chiếu cùng chuỗi.
+  Có điều chỉnh đang xử lý thì tạm dừng bàn giao mới;
+  chỉ bàn giao tổng hiện hành và delta, không cộng các bản đầy đủ.
+end note
+@enduml
