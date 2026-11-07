@@ -1,0 +1,30 @@
+---
+description: Nguyên tắc chung về căn cứ, phân tích yêu cầu và chất lượng thiết kế
+alwaysApply: true
+---
+# Hướng dẫn chung
+
+## 1. Căn cứ và phạm vi
+
+- Xác định module, tài liệu nguồn và đầu ra trước khi làm việc. Kiểm tra file thực tế; không giả định nguồn, mã nguồn hoặc hệ thống đã tồn tại.
+- Đọc nguồn gốc trước khi dùng tài liệu dẫn xuất. Các ví dụ thiết kế không phải nguồn nghiệp vụ có thẩm quyền.
+- Khi nêu yêu cầu, business rule hoặc vấn đề, ghi tên nguồn, trang PDF tính từ 1, mục và mã US/rule nếu có. Giữ nguyên mã gốc.
+- Phân biệt `Có trong đặc tả`, `Suy ra trực tiếp`, `Đề xuất kỹ thuật`, `Cần xác nhận` và `Đã xác nhận`. Mọi suy ra trực tiếp phải giải thích căn cứ, không dùng nhãn này để thêm nghiệp vụ.
+- Nếu hai phát biểu mâu thuẫn, ghi cả hai và tác động; không tự ưu tiên bảng rule hơn user story hoặc ngược lại. Không dùng tài liệu mẫu cũ để giải quyết mâu thuẫn của nguồn mới.
+
+## 2. Quyết định và câu hỏi
+
+- Ghi vấn đề, phương án, lý do cần xác nhận, phạm vi ảnh hưởng và trạng thái trong hồ sơ phân tích của module.
+- Không coi phương án AI đề nghị, thông số cấu hình, code mẫu hay nhận xét Reviewer là quyết định nghiệp vụ được chấp thuận.
+- Với xác nhận đã có trong phiên hoặc tài liệu, ghi đúng căn cứ và áp dụng; không hỏi lại. Nếu thiếu, chỉ cần hỏi các câu thật sự ảnh hưởng quyết định và tiếp tục phần độc lập.
+- Có thể hoàn thiện bản nháp với nhiều phương án gắn mã vấn đề. Không âm thầm chọn một nhánh cho API/schema/UML; ghi rõ nhánh nào chưa chốt và cần cập nhật những file nào khi có quyết định.
+- Phân biệt đề xuất kỹ thuật thông thường (agent có thể chọn và giải thích) với lựa chọn làm thay đổi nghiệp vụ (cần căn cứ xác nhận).
+
+## 3. Tính nhất quán và kiểm tra
+
+- Dùng cùng tên actor, entity, thuộc tính, trạng thái và hành động trong toàn bộ tài liệu.
+- Truy vết yêu cầu đến thiết kế, UML, API, dữ liệu và cách kiểm chứng. Yêu cầu bị chặn vẫn có dòng truy vết, mã vấn đề và lý do.
+- Không tự thêm yêu cầu hiệu năng, bảo mật hoặc kiến trúc bắt buộc ngoài nguồn; đề xuất kỹ thuật phải được ghi nhãn và giải thích.
+- Ghi trung thực kiểm tra đã chạy, phạm vi và giới hạn. Không gọi việc đọc sơ đồ là đã render, không coi kế hoạch test là test đã chạy.
+- Không sửa mã ứng dụng khi chỉ được yêu cầu phân tích/thiết kế/review. Không tạo hàng loạt sơ đồ hoặc code không phục vụ yêu cầu.
+- Viết nội dung bằng tiếng Việt, giữ thuật ngữ kỹ thuật và mã định danh khi giúp nhất quán. Giải thích ngắn quyết định để thành viên có thể vấn đáp.

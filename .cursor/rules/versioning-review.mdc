@@ -1,0 +1,46 @@
+---
+description: Lưu phiên bản thiết kế và bằng chứng review theo module và từng vòng bằng Git
+alwaysApply: true
+---
+# Quy trình phiên bản và review
+
+## 1. Định danh
+
+- Bộ thiết kế hiện hành: `docs/design/<module-id>/`. Một module gồm nhiều US liên quan, không tạo bộ tài liệu trùng cho từng US.
+- Hồ sơ vòng review: `docs/reviews/<module-id>/R001/`, `R002/`... Số vòng tăng trong phạm vi module; không dùng tên `first-run` hoặc `after-review` làm nơi lưu thiết kế.
+- Commit Git định danh phiên bản; mã vòng định danh hoạt động review. Trường `Version` trong dữ liệu ứng dụng không thay thế lịch sử tài liệu.
+- Đường dẫn trong hồ sơ review phải được tính từ workspace, ghi cả repository root và tiền tố đường dẫn nếu repository gốc nằm ở thư mục cha.
+
+## 2. Baseline trước review
+
+- Kiểm tra repository và thay đổi hiện có trước khi thao tác. Không stage file không liên quan, không sửa danh tính Git, không tự push hay thay lịch sử.
+- Khi có nhiệm vụ lưu mốc phiên bản, tạo commit thiết kế trước khi Reviewer bắt đầu. Nếu chỉ đang soạn bản nháp, không cần commit mọi chỉnh sửa nhỏ.
+- Lưu SHA đầy đủ của baseline thật và danh sách đường dẫn được review. Không điền SHA giả, không đổi baseline sau khi đã phát hành findings.
+- Reviewer đọc phiên bản đúng tại baseline. Nếu working tree khác baseline, dùng nội dung từ commit để review; nếu không đọc được commit, dừng phần đánh giá phụ thuộc phiên bản và nêu trở ngại, không coi working tree là baseline.
+- Với vòng đầu, ghi `Loại mốc: Thiết kế lần chạy đầu`. Không sửa ngược phiên bản đầu để làm bằng chứng tốt hơn.
+
+## 3. Bốn tài liệu mỗi vòng
+
+Sao chép biểu mẫu từ `docs/reviews/_templates/` khi bắt đầu vòng thật:
+
+1. `review-record.md`: phạm vi, baseline, người/công cụ review, thời điểm, trạng thái, revised commit và các xác minh.
+2. `findings.md`: nhận xét của Reviewer, mức độ, vị trí và căn cứ.
+3. `team-evaluation.md`: nhóm đánh giá đúng/sai/thừa, quyết định xử lý và lý do; AI chỉ đề xuất nếu được yêu cầu, không tự nhận là nhóm đã xác nhận.
+4. `changes.md`: mapping finding → quyết định → file thay đổi → cách kiểm tra → trạng thái.
+
+Mã finding: `<module-id>-R001-F001`, tăng dần trong vòng. Vấn đề đặc tả dùng mã riêng và có thể được nhiều finding tham chiếu; không trộn mã finding với `PAY-*`.
+
+## 4. Sau review
+
+- Chỉ sửa theo đánh giá đã được người dùng/nhóm xác nhận; dùng xác nhận có sẵn, không hỏi lại. Nhận xét thuần kỹ thuật thuộc phạm vi được giao có thể được xử lý theo thẩm quyền đó và ghi rõ căn cứ.
+- Không coi việc chấp nhận một finding về mâu thuẫn là đã chọn phương án nghiệp vụ. Nếu phương án chưa được xác nhận, cập nhật mô tả vấn đề và đánh dấu phần còn bị chặn.
+- Commit bộ thiết kế sau chỉnh sửa trước; lấy SHA thật, điền `revised_commit`, rồi commit hồ sơ review. Không yêu cầu tài liệu chứa SHA của chính commit chứa nó.
+- So sánh baseline và revised commit bằng Git diff theo đúng đường dẫn module; kiểm tra các sơ đồ, API, dữ liệu và truy vết cùng thay đổi. Ghi lệnh và kết quả kiểm tra thực tế.
+- Không dùng reset, rebase hoặc amend để thay các commit đã được hồ sơ review tham chiếu. Sửa sai bằng commit mới và vòng/phụ lục có giải thích.
+- Không đóng vòng chỉ vì đã có hai SHA. Phải có đánh giá nhóm, mapping thay đổi, kết quả kiểm tra và ghi rõ các điểm còn mở.
+
+## 5. Trạng thái
+
+`Chuẩn bị` → `Đang review` → `Chờ đánh giá nhóm` → `Đang chỉnh sửa` → `Đã đối chiếu`.
+
+`Đã đối chiếu` chỉ mô tả vòng review; không đồng nghĩa nghiệp vụ đã xác nhận hết hay thiết kế đã phê duyệt. Nếu còn vấn đề, ghi danh sách và tác động. Thiếu Git hoặc thiếu baseline thì ghi `Chưa lưu được mốc phiên bản`, không bịa lịch sử hay tạo hai bản sao rồi tuyên bố đã có commit.

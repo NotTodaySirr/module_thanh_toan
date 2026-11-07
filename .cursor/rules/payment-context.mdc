@@ -1,0 +1,44 @@
+---
+description: Ngữ cảnh và giới hạn của bài tập thiết kế module bảng thanh toán
+alwaysApply: true
+---
+# Ngữ cảnh module payment-management
+
+Chỉ áp dụng các quy tắc nghiệp vụ trong file này khi làm `payment-management`; không áp chúng cho module khác.
+
+## 1. Nguồn và phạm vi
+
+- Nguồn nghiệp vụ: `btcohong.pdf`, 3 trang. Trang 1: mục 1-3; trang 2: mục 4-5; trang 3: mục 6, sản phẩm và đánh giá.
+- Module lập, trình duyệt, duyệt/từ chối, điều chỉnh và hủy bảng thanh toán. Hợp đồng, bảng giá, sản lượng thuộc module khác; chỉ đọc chúng (trang 1, mục 1).
+- Không triển khai quản lý hợp đồng/bảng giá/sản lượng, xuất hóa đơn, công nợ hay ký điện tử như chức năng nội bộ của module. Nếu mô tả chuyển giao kế toán, chỉ thiết kế ranh giới liên quan; hợp đồng tích hợp chưa có phải đánh dấu đề xuất hoặc câu hỏi.
+- Không nhập business rule cùng mã từ `QTKD_DATH.pdf`. Không mặc định công nghệ .NET/PostgreSQL của template là ràng buộc trong bài này.
+
+## 2. Phát biểu cần truy vết
+
+- NVKD lập và trình bảng; KTT và GĐKD tham gia duyệt. Không tự gán actor hủy khi nguồn chưa quy định (trang 1 mục 2, trang 2 mục 4).
+- Giữ `US-PAY-01` đến `US-PAY-05`, `PAY-01` đến `PAY-08`. Bảng phân tích phải bao phủ đủ, kể cả phát biểu đang mâu thuẫn.
+- Các trạng thái được liệt kê: `Draft`, `PendingApproval`, `Approved`, `Rejected`, `Cancelled` (trang 1 mục 3). Không tự xóa `Rejected` hoặc thêm trạng thái để che mâu thuẫn.
+- Kiểm tra hợp đồng Active và bảng giá phù hợp (PAY-01), sản lượng đã đối soát trước khi lập (PAY-02), thành tiền = sản lượng × đơn giá tại thời điểm tính (PAY-03).
+- Khi trình: chặn tổng âm, thiếu dịch vụ bắt buộc và thao tác trình trùng (PAY-04). Không biến điều kiện tổng âm thành cấm tổng bằng 0 khi nguồn không nói.
+- Người lập không tự duyệt (PAY-07); từ chối phải có lý do (PAY-08). Role và danh tính người lập là các kiểm tra khác nhau.
+- Thay đổi trạng thái và điều chỉnh phải lưu ai, lúc nào, thay đổi gì. Lập bảng phản hồi trong vòng 3 giây với hợp đồng dưới 200 dòng; đúng 200 dòng chưa được nguồn bao phủ (trang 3 mục 6).
+
+## 3. Điểm phải kiểm tra trước khi chốt thiết kế
+
+Các mục sau là phát hiện ban đầu để BA kiểm tra lại trên PDF, không phải đáp án nghiệp vụ đã được xác nhận:
+
+| Mã vấn đề | Vị trí | Nội dung cần xác nhận |
+| --- | --- | --- |
+| PAY-ISS-001 | Trang 2, US-PAY-04 và PAY-05 | Cho phép KTT điều chỉnh Approved có biên bản hay cấm sửa mọi hình thức? Có dùng hồ sơ điều chỉnh riêng không? |
+| PAY-ISS-002 | Trang 2, US-PAY-03 và PAY-06 | Chính xác 500.000.000 đồng do GĐKD hay KTT duyệt: `>=` hay `>`? |
+| PAY-ISS-003 | Trang 1 mục 3; trang 2 PAY-08 | Từ chối lưu Rejected hay chuyển ngay Draft? Nếu đi qua cả hai, thời điểm và hành động nào gây chuyển trạng thái? |
+| PAY-ISS-004 | Trang 1 mục 2; trang 2 PAY-01 | Kỳ tháng/quý kết hợp quy tắc một bảng mỗi tháng thế nào? Khóa duy nhất và chống chồng kỳ ra sao? |
+
+Không tự giải quyết các mục trên bằng cách đưa vào cấu hình. Lưu phương án và ảnh hưởng trong `docs/analysis/payment-management/issues.md`. Chi tiết còn thiếu như quyền hủy, dữ liệu được sửa ở Draft, danh mục bắt buộc, làm tròn và thời điểm chọn giá cũng cần căn cứ.
+
+## 4. Sản phẩm
+
+- Thiết kế trong `docs/design/payment-management/` theo Design Agent; bắt buộc có class, sequence và state diagram. Các sơ đồ khác theo nhu cầu thực tế.
+- Lưu vấn đề đặc tả, đánh giá nhận xét Reviewer đúng/sai/thừa, phiên bản trước/sau review bằng Git, prompt log và phân công.
+- Trình bày tối đa 5 slide. Nhật ký phải phân biệt phần AI tạo và phần nhóm chỉnh sửa.
+- Không coi nội dung chưa được xác nhận hay biểu mẫu trống là thiết kế đã hoàn tất.
