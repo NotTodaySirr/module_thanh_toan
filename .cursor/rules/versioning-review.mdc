@@ -15,7 +15,7 @@ alwaysApply: true
 
 - Kiểm tra repository và thay đổi hiện có trước khi thao tác. Không stage file không liên quan, không sửa danh tính Git, không tự push hay thay lịch sử.
 - Khi có nhiệm vụ lưu mốc phiên bản, tạo commit thiết kế trước khi Reviewer bắt đầu. Nếu chỉ đang soạn bản nháp, không cần commit mọi chỉnh sửa nhỏ.
-- Lưu SHA đầy đủ của baseline thật và danh sách đường dẫn được review. Không điền SHA giả, không đổi baseline sau khi đã phát hành findings.
+- Lưu SHA đầy đủ của baseline thật vào trường `baseline_commit` cùng danh sách đường dẫn được review. Không điền SHA giả, không đổi baseline sau khi đã phát hành findings. Commit chỉ chứa instructions hoặc biểu mẫu trống không phải baseline thiết kế.
 - Reviewer đọc phiên bản đúng tại baseline. Nếu working tree khác baseline, dùng nội dung từ commit để review; nếu không đọc được commit, dừng phần đánh giá phụ thuộc phiên bản và nêu trở ngại, không coi working tree là baseline.
 - Với vòng đầu, ghi `Loại mốc: Thiết kế lần chạy đầu`. Không sửa ngược phiên bản đầu để làm bằng chứng tốt hơn.
 

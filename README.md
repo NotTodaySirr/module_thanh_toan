@@ -7,7 +7,7 @@ Mở `module_thanh_toan/` làm thư mục gốc trong công cụ để tránh n�
 
 Chuyển đặc tả `btcohong.pdf` thành thiết kế có căn cứ, đánh giá kết quả AI và chứng minh thay đổi sau review. Bộ hướng dẫn viết bằng tiếng Việt, kế thừa phương pháp BA, HLD/LLD, UML và truy vết của template QTKD.
 
-Đây là bộ hướng dẫn và biểu mẫu, chưa phải bộ thiết kế hoàn chỉnh hay kết quả review thực tế. Thư mục này chưa được khởi tạo Git tại thời điểm tạo bộ hướng dẫn; các mốc commit phải được tạo trong quá trình làm bài.
+Đây là bộ hướng dẫn và biểu mẫu, chưa phải bộ thiết kế hoàn chỉnh hay kết quả review thực tế. Workspace đã có repository Git khi kiểm tra cuối lượt thiết lập. Commit khởi tạo hướng dẫn không thay thế baseline thiết kế lần đầu; các mốc thiết kế trước/sau review phải được lưu trong quá trình làm bài.
 
 ## 2. Cấu trúc và phân loại
 
@@ -66,14 +66,12 @@ Ví dụ prompt chỉnh sửa:
 5. Design sửa theo nhận xét đã được chấp nhận và quyết định đã có. Lưu bằng một commit chứa thiết kế đã sửa. Ghi SHA đó vào `revised_commit`, cập nhật báo cáo và lưu hồ sơ review bằng commit tiếp theo. Cách tách này tránh yêu cầu một commit phải chứa chính SHA của nó.
 6. R002, R003... tiếp tục cùng cơ chế. Không tạo lại hay ghi đè R001. Mỗi module có chuỗi số vòng riêng.
 
-Nếu workspace chưa thuộc repository, khởi tạo Git tại workspace này hoặc dùng repository cha đã được nhóm chọn. Không khởi tạo repository lồng nhau khi đã có repository cha. Không tự cấu hình danh tính Git thay thành viên.
+Sử dụng repository hiện có. Nếu tái sử dụng bộ hướng dẫn ở workspace khác chưa thuộc repository, khởi tạo Git tại workspace đó hoặc dùng repository cha đã được nhóm chọn. Không khởi tạo repository lồng nhau khi đã có repository cha. Không tự cấu hình danh tính Git thay thành viên.
 
 Ví dụ lệnh PowerShell, chạy từ workspace sau khi đã tạo tài liệu tương ứng:
 
 ```powershell
 git status
-# Chỉ chạy git init nếu chưa thuộc repository nào.
-git init
 git add -- AGENTS.md README.md .cursor btcohong.pdf docs/analysis docs/design docs/process
 git commit -m "docs(payment-management): lưu thiết kế ban đầu trước review R001"
 git rev-parse HEAD
@@ -90,7 +88,7 @@ git add -- docs/reviews/payment-management/R001 docs/process
 git commit -m "docs(payment-management): lưu bằng chứng review R001"
 ```
 
-Các lệnh trên lưu hai thời điểm thiết kế và hồ sơ giải thích; chúng không tự tạo tài liệu hay xác nhận nghiệp vụ. Trước mỗi commit, xem diff và chỉ stage các file đúng nhiệm vụ. Không dùng lệnh reset/rebase/amend để thay lịch sử đã dùng làm bằng chứng. Nếu Git không dùng được, ghi rõ bước lưu phiên bản chưa hoàn tất; không tuyên bố đã đáp ứng yêu cầu 3. Bộ hướng dẫn này chọn phương án lịch sử Git được đề cho phép.
+Các lệnh trên lưu hai thời điểm thiết kế và hồ sơ giải thích; chúng không tự tạo tài liệu hay xác nhận nghiệp vụ. Chỉ lưu baseline thiết kế sau khi đã có các tài liệu thiết kế thật, không dùng riêng README hoặc biểu mẫu trống. Trước mỗi commit, xem diff và chỉ stage các file đúng nhiệm vụ. Không dùng lệnh reset/rebase/amend để thay lịch sử đã dùng làm bằng chứng. Nếu Git không dùng được, ghi rõ bước lưu phiên bản chưa hoàn tất; không tuyên bố đã đáp ứng yêu cầu 3. Bộ hướng dẫn này chọn phương án lịch sử Git được đề cho phép.
 
 ## 5. Đối chiếu sản phẩm bài tập, trang 3
 
