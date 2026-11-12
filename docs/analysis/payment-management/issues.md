@@ -1,8 +1,8 @@
 # Sổ vấn đề đặc tả - payment-management
 
-- Trạng thái hồ sơ: **14 vấn đề Đã xác nhận phương án xử lý** theo PAY-DEC-001 đến PAY-DEC-014; PRM-006 ngày 07/11/2026.
+- Trạng thái hồ sơ: **14 vấn đề Đã xác nhận phương án xử lý**, BA cập nhật sau R002 theo PRM-011. Giữ PAY-DEC-001 đến PAY-DEC-014 của PRM-006; bổ sung PAY-DEC-015 làm rõ F001, thêm AC cho F002.
 - Nguồn nghiệp vụ: [btcohong.pdf](../../requirements/btcohong.pdf), đủ 3 trang, trang tính từ 1. Mọi vị trí PDF bên dưới chỉ về file này.
-- Lượt cập nhật: BA ngày 07/11/2026, múi giờ Asia/Bangkok; xem PRM-006 trong [nhật ký](../../process/prompt-log.md).
+- Lượt cập nhật sau review: BA ngày 12/11/2026, múi giờ Asia/Bangkok; xem PRM-011 trong [nhật ký](../../process/prompt-log.md), [findings R002](../../reviews/payment-management/R002/findings.md) mục 4 và phần bổ sung tại mục 7 dưới đây. Lượt xác nhận đầu là PRM-006 ngày 07/11/2026.
 - Lịch sử: 11 vấn đề PAY-ISS-001 đến PAY-ISS-011 là phát hiện khởi tạo do AI soạn trong bộ hướng dẫn. Lượt BA này đã kiểm chứng lại và bổ sung phân tích; giữ nguyên mã và nội dung trọng tâm. PAY-ISS-012 đến PAY-ISS-014 là phát hiện bổ sung trong lượt này.
 - Người dùng đã chấp thuận toàn bộ 14 phương án PRM-005 trong PRM-006; xem nội dung, căn cứ và phạm vi tại [decisions.md](decisions.md). Không cần xác nhận lại các lựa chọn đã chấp thuận.
 - Lượt đề xuất PRM-005 ngày 07/11/2026: **đã có khuyến nghị BA cho đủ 14 vấn đề tại mục 6**, gồm quy tắc đề nghị, lý do/đánh đổi, ví dụ kiểm chứng và bên nên xác nhận. Đây là lịch sử đề xuất trước phê duyệt; PRM-006 đã chấp thuận toàn bộ. Giữ nguyên nội dung nguồn để truy vết.
@@ -11,24 +11,24 @@
 
 | Mã | Loại | Chủ đề | Nguồn PDF | Trạng thái |
 | --- | --- | --- | --- | --- |
-| PAY-ISS-001 | Mâu thuẫn | Điều chỉnh Approved hay cấm sửa | Trang 2 mục 4.4 US-PAY-04; mục 5 PAY-05 | Đã xác nhận - PAY-DEC-001 |
+| PAY-ISS-001 | Mâu thuẫn | Điều chỉnh Approved hay cấm sửa | Trang 2 mục 4.4 US-PAY-04; mục 5 PAY-05 | Đã xác nhận - PAY-DEC-001; bổ sung PAY-DEC-015 sau F001 |
 | PAY-ISS-002 | Mâu thuẫn tại biên | Người duyệt đúng 500 triệu | Trang 2 mục 4.3 US-PAY-03; mục 5 PAY-06 | Đã xác nhận - PAY-DEC-002 |
-| PAY-ISS-003 | Không nhất quán trạng thái | Rejected hay Draft sau từ chối | Trang 1 mục 3; trang 2 mục 5 PAY-08 | Đã xác nhận - PAY-DEC-003 |
-| PAY-ISS-004 | Không nhất quán về kỳ | Kỳ quý và một bảng mỗi tháng | Trang 1 mục 2; trang 2 mục 5 PAY-01 | Đã xác nhận - PAY-DEC-004 |
+| PAY-ISS-003 | Không nhất quán trạng thái | Rejected hay Draft sau từ chối | Trang 1 mục 3; trang 2 mục 5 PAY-08 | Đã xác nhận - PAY-DEC-003; bổ sung PAY-DEC-015 sau F001 |
+| PAY-ISS-004 | Chưa rõ cách kết hợp quy tắc | Kỳ quý và một bảng mỗi tháng | Trang 1 mục 2; trang 2 mục 5 PAY-01 | Đã xác nhận - PAY-DEC-004 |
 | PAY-ISS-005 | Thiếu thông tin | Danh sách dịch vụ bắt buộc | Trang 2 mục 5 PAY-04 | Đã xác nhận - PAY-DEC-005 |
 | PAY-ISS-006 | Mơ hồ | Phạm vi sửa Draft | Trang 2 mục 4.1 US-PAY-01; trang 3 mục 6 | Đã xác nhận - PAY-DEC-006 |
-| PAY-ISS-007 | Thiếu thông tin | Quyền hủy và lập bảng thay thế | Trang 2 mục 4.5 US-PAY-05; mục 5 PAY-01 | Đã xác nhận - PAY-DEC-007 |
+| PAY-ISS-007 | Thiếu thông tin | Quyền hủy và lập bảng thay thế | Trang 2 mục 4.5 US-PAY-05; mục 5 PAY-01 | Đã xác nhận - PAY-DEC-007; bổ sung PAY-DEC-015 sau F001 |
 | PAY-ISS-008 | Mơ hồ | Chọn giá và thời điểm tính | Trang 2 mục 5 PAY-01, PAY-03 | Đã xác nhận - PAY-DEC-008 |
 | PAY-ISS-009 | Thiếu thông tin | Độ chính xác, làm tròn và tổng tiền | Trang 2 mục 4.1, 4.3; mục 5 PAY-03, PAY-04, PAY-06 | Đã xác nhận - PAY-DEC-009 |
 | PAY-ISS-010 | Mơ hồ về phép đo | Phản hồi 3 giây/dưới 200 dòng | Trang 3 mục 6 | Đã xác nhận - PAY-DEC-010 |
 | PAY-ISS-011 | Thiếu thông tin | Phân công và phạm vi quyền | Trang 1 mục 2; trang 2 mục 4.1-4.3; mục 5 PAY-06, PAY-07 | Đã xác nhận - PAY-DEC-011 |
-| PAY-ISS-012 | Thiếu thông tin | Dữ liệu nguồn đổi sau khi lập Draft | Trang 2 mục 4.1, 4.2, 4.4; mục 5 PAY-01 đến PAY-03 | Đã xác nhận - PAY-DEC-012 |
-| PAY-ISS-013 | Thiếu thông tin | Chuyển bảng sang kế toán | Trang 1 mục 1; trang 2 mục 4.3 | Đã xác nhận - PAY-DEC-013 |
+| PAY-ISS-012 | Thiếu thông tin | Dữ liệu nguồn đổi sau khi lập Draft | Trang 2 mục 4.1, 4.2, 4.4; mục 5 PAY-01 đến PAY-03 | Đã xác nhận - PAY-DEC-012; bổ sung AC theo F002 |
+| PAY-ISS-013 | Thiếu thông tin | Chuyển bảng sang kế toán | Trang 1 mục 1; trang 2 mục 4.3 | Đã xác nhận - PAY-DEC-013; bổ sung PAY-DEC-015 sau F001 |
 | PAY-ISS-014 | Thiếu luồng ngoại lệ | Gửi thông báo thất bại và trình lại | Trang 2 mục 4.2; mục 5 PAY-04 | Đã xác nhận - PAY-DEC-014 |
 
 Các câu hỏi và phương án tại mục 2-4 ghi lại phát hiện/lựa chọn trước khi chốt; nhãn Trạng thái dưới mỗi vấn đề là kết quả hiện hành. Mục 6 giữ lịch sử đề xuất PRM-005 đã được người dùng chấp thuận toàn bộ trong PRM-006. Áp dụng PAY-DEC tương ứng tại [decisions.md](decisions.md), không coi các nhánh tham khảo khác là phương án hiện hành. Các mã AC tham chiếu [requirements-analysis.md](requirements-analysis.md).
 
-## 2. Bốn mâu thuẫn trọng tâm đã kiểm chứng
+## 2. Bốn điểm trọng tâm đã kiểm chứng
 
 ### PAY-ISS-001 - Điều chỉnh Approved
 
@@ -63,7 +63,7 @@ Các câu hỏi và phương án tại mục 2-4 ghi lại phát hiện/lựa ch
 ### PAY-ISS-004 - Kỳ tháng/quý và tính duy nhất
 
 - **Vị trí và hai phát biểu:** PDF trang 1 mục 2 nêu kỳ tháng hoặc quý theo cấu hình hợp đồng; trang 2 mục 5 PAY-01 quy định mỗi hợp đồng chỉ có một bảng cho mỗi tháng.
-- **Loại:** Không nhất quán giữa kỳ và tính duy nhất; chưa đủ căn cứ kết luận cấm kỳ quý.
+- **Loại:** Chưa rõ cách kết hợp quy tắc kỳ và tính duy nhất; chưa đủ căn cứ kết luận hai phát biểu không thể cùng đúng hoặc phải cấm kỳ quý. Nhãn được làm rõ theo A004, không đổi PAY-DEC-004.
 - **Câu hỏi:** Với kỳ quý, tính duy nhất theo quý hay từng tháng thuộc quý? Có cấm chồng kỳ tháng/quý không? Kiểm tra kỳ cũ thế nào nếu cấu hình hợp đồng đổi?
 - **Lý do hỏi:** Tự đổi “mỗi tháng” thành “mỗi kỳ” là thay nghiệp vụ; ảnh hưởng chặn trùng và bao phủ sản lượng.
 - **Phương án tham khảo trước xác nhận (lịch sử):** (A) Một bảng theo kỳ cấu hình, bổ sung quy định chồng kỳ. (B) Bảng quý chiếm ba tháng tương ứng, kiểm tra từng tháng. Mỗi cách cần xác nhận chuyển cấu hình; chưa chốt khóa dữ liệu.
@@ -181,7 +181,7 @@ Các câu hỏi và phương án tại mục 2-4 ghi lại phát hiện/lựa ch
 - Nếu chỉ trả lời một phần, ghi phạm vi đã xác nhận và tiếp tục giữ phần còn thiếu mở; không đóng cả vấn đề chỉ vì có một câu trả lời.
 - Quyết định phải liên kết US/AC/quy tắc/NFR và tài liệu cần rà soát. API/dữ liệu/UML nêu ở trên chỉ là phạm vi ảnh hưởng dự kiến, chưa được tạo trong lượt BA này.
 - Thứ tự làm rõ do BA đề xuất: bốn mâu thuẫn trọng tâm, quyền/dữ liệu/tính tiền, sau đó tích hợp và phép đo. Chưa gán cá nhân hoặc nhóm xác nhận thay người dùng.
-- Hiện có 14 vấn đề Đã xác nhận và 14 quyết định PAY-DEC-001 đến PAY-DEC-014. [Phân tích yêu cầu](requirements-analysis.md) và bàn giao Design áp dụng các quyết định; việc cung cấp dữ liệu/nhân sự và kiểm chứng thực tế vẫn cần thực hiện.
+- Hiện có 14 vấn đề Đã xác nhận, 14 quyết định ban đầu và PAY-DEC-015 bổ sung sau R002. Mục 7 và [phân tích yêu cầu](requirements-analysis.md) ghi nội dung hiện hành; việc cung cấp dữ liệu/nhân sự và kiểm chứng thực tế vẫn cần thực hiện. Giữ mục 6 nguyên vẹn như lịch sử đề xuất, không dùng số lượng/kết quả lịch sử ở cuối mục 6 làm trạng thái sau R002.
 
 ## 6. Lịch sử đề xuất quyết định của BA - PRM-005
 
@@ -329,3 +329,37 @@ Phần tiếp theo giữ nguyên lời đề xuất trước phê duyệt, gồm
 - Khi có xác nhận, cập nhật các US/AC, diễn giải PAY/NFR, trạng thái/quyền và ma trận truy vết trong [requirements-analysis.md](requirements-analysis.md); Design cập nhật tài liệu liên quan theo phạm vi ảnh hưởng tại từng vấn đề. Mục 6 này giữ lại làm lịch sử đề xuất, không thay bằng một bản ghi phê duyệt không có căn cứ.
 
 Kết quả PRM-005: **14 khuyến nghị BA, 14 vấn đề Cần xác nhận, 0 quyết định nghiệp vụ đã phê duyệt**.
+
+## 7. Bổ sung sau review phân tích R002 - PRM-011
+
+### 7.1 Căn cứ và phạm vi
+
+- Người dùng đã chấp thuận đánh giá và phương án tại findings R002 mục 4 ngày 12/11/2026: A001-A014 Đúng, F001 Đúng có giới hạn, F002 Đúng, F003 Thừa. Prompt xác nhận được lưu tại đó; người dùng giao BA áp dụng bằng “ok proceed on your tasks” trong PRM-011. Không tự gán xác nhận cho KTT/GĐKD hoặc thành viên khác.
+- Giữ 14 vấn đề và phương án PRM-006. F001 bổ sung chi tiết cho PAY-ISS-001/003/007/013; F002 bổ sung tiêu chí kiểm chứng PAY-ISS-012. Không cấp lại mã PAY-ISS, không coi 14 nhận xét A là 14 lỗi mới. Mục 6 giữ nguyên lịch sử PRM-005.
+
+### 7.2 F001 - Vòng đời điều chỉnh và bàn giao
+
+- **Khoảng trống được chấp nhận:** cụm “đang xử lý/chưa duyệt” chưa nêu tập trạng thái; không kết luận hệ thống chắc chắn kẹt hoặc tạo trùng. Bảng trạng thái đã được người dùng xác nhận, không còn câu hỏi chặn phần này.
+- **Quyết định bổ sung:** PAY-DEC-015 trong [decisions.md](decisions.md) mục 4.15. Draft/PendingApproval/Rejected giữ vị trí điều chỉnh duy nhất và tạm dừng bàn giao mới. Rejected chỉ mở lại chính hồ sơ bởi KTT phụ trách; khi bỏ thì mở Draft rồi hủy có lý do/audit trước tạo khác.
+- **Kết thúc giữ vị trí:** Approved/Cancelled kết thúc giữ vị trí của chính hồ sơ đó. Chỉ tạo điều chỉnh khác khi toàn chuỗi không còn hồ sơ đang xử lý và đủ điều kiện. Approved dùng căn cứ mới đã duyệt để bàn giao; Cancelled dùng bản Approved hiện hành. Cả hai chỉ tiếp tục bàn giao khi không có điều chỉnh khác đang xử lý. Cancelled không phục hồi, không đổi giá trị đã duyệt hoặc giải phóng kỳ gốc.
+- **Ảnh hưởng hiện hành:** PAY-ISS-001 → điều kiện tạo tiếp và hiệu lực; PAY-ISS-003 → Rejected giữ vị trí khi mở lại; PAY-ISS-007 → hủy kết thúc giữ vị trí, giữ kỳ gốc; PAY-ISS-013 → dừng/tiếp tục bàn giao. US-PAY-03/04/05, bảng trạng thái mục 6.1 và truy vết mục 8.3 của requirements-analysis.md đã đồng bộ.
+- **AC bổ sung:** AC-US-PAY-04-04 (Draft/PendingApproval/Rejected), AC-US-PAY-04-05 (Rejected → Draft → Cancelled), AC-US-PAY-04-06 (Approved và kiểm tra toàn chuỗi). Giữ quyền, căn cứ nguồn, biên bản, duyệt độc lập và audit theo các quyết định trước.
+
+### 7.3 F002 - Bao phủ ngoại lệ nguồn
+
+Giữ PAY-DEC-012, không chốt lại nghiệp vụ hoặc nhận là PDF quy định chi tiết. Bốn AC mới tại requirements-analysis.md và mapping mục 8.3:
+
+| Quyết định | US | AC | Nhánh và kết quả mong đợi |
+| --- | --- | --- | --- |
+| PAY-DEC-012 | US-PAY-02 | AC-US-PAY-02-06 | Nguồn đổi trước trình 100 → 110 triệu: chặn, giữ Draft/100 triệu đến khi người phụ trách xem/chấp nhận cập nhật; không tự đổi rồi trình |
+| PAY-DEC-012 | US-PAY-02 | AC-US-PAY-02-07 | Không đọc được nguồn trước trình: chặn, giữ Draft/số tiền đã lưu |
+| PAY-DEC-012 | US-PAY-03 | AC-US-PAY-03-09 | Nguồn đổi ảnh hưởng/không hợp lệ trước duyệt: chặn, giữ PendingApproval/nội dung lần trình, thông báo; người được giao từ chối có lý do để sửa, không tự từ chối |
+| PAY-DEC-012 | US-PAY-03 | AC-US-PAY-03-10 | Không đọc được nguồn trước duyệt: giữ PendingApproval/nội dung lần trình chờ kiểm tra, không tự Approved/Rejected |
+
+Truy vết PAY-ISS-012 hiện hành bao gồm cả US-PAY-03 và bốn AC này, bổ sung các tham chiếu nhánh hợp lệ ban đầu ở mục 4/6.13. Thiếu bao phủ AC đã được xử lý trong tài liệu; chưa kiểm thử ứng dụng.
+
+### 7.4 Những nhận xét còn lại và bàn giao
+
+- A001/A007/A013 theo F001; A012 theo F002. A003 cũng liên quan bước mở lại của F001. A004 chỉ làm rõ nhãn “Chưa rõ cách kết hợp quy tắc” ở mục 1/2, giữ PAY-DEC-004. Các nhận xét A còn lại giữ quyết định PRM-006, không thêm việc nghiệp vụ.
+- F003 được đánh giá Thừa; khi biên tập chỉ đổi nhãn cột nguồn trong requirements-analysis.md thành “Tóm lược phát biểu nguồn” và lời dẫn tương ứng. Giữ nguyên nội dung tám dòng tóm lược, diễn giải nghiệp vụ và PDF; không mở quyết định mới cho việc đổi nhãn.
+- Bàn giao Design theo phân tích 37 AC và PAY-DEC-001 đến PAY-DEC-015, xem requirements-analysis.md mục 9.4. Phụ thuộc dữ liệu/nhân sự/môi trường vẫn cần chuẩn bị; bộ thiết kế đã có chưa được cập nhật trong lượt BA này. Bằng chứng kiểm tra và phiên bản thực tế tại [changes R002](../../reviews/payment-management/R002/changes.md).

@@ -1,13 +1,14 @@
 # Phân tích yêu cầu nghiệp vụ - payment-management
 
 - Module: `payment-management`.
-- Trạng thái: **Đã xác nhận 14 lựa chọn nghiệp vụ - PRM-006**.
+- Trạng thái: **BA cập nhật sau review R002 - PRM-011**; giữ 14 lựa chọn PRM-006, bổ sung PAY-DEC-015 theo xác nhận F001 và AC cho F002.
 - Ngày lập: 07/11/2026, múi giờ Asia/Bangkok; không ghi giờ khi chưa có căn cứ.
 - Người soạn: AI hỗ trợ vai trò BA; người dùng trong phiên đã chấp thuận phương án PRM-005, chưa cung cấp tên cá nhân.
 - Phạm vi tài liệu: phân tích và bàn giao đầu vào cho Design; không phải thiết kế hay bằng chứng ứng dụng đã đáp ứng yêu cầu.
 - Nguồn: [btcohong.pdf](../../requirements/btcohong.pdf), đủ 3 trang, đánh số từ 1. File thực tế nằm trong `docs/requirements/`, khác đường dẫn ở một số hướng dẫn cũ; không di chuyển hoặc sửa nguồn.
 - Hồ sơ liên quan: [sổ vấn đề](issues.md), [sổ xác nhận](decisions.md), [nhật ký prompt](../../process/prompt-log.md).
 - Cập nhật PRM-006 ngày 07/11/2026: người dùng chấp thuận toàn bộ 14 phương án PRM-005, ghi thành PAY-DEC-001 đến PAY-DEC-014 trong [sổ xác nhận](decisions.md). Nội dung dưới đây đã đồng bộ; PDF và mã nguồn gốc giữ nguyên. Quyết định chưa phải bằng chứng triển khai hoặc nghiệm thu.
+- Cập nhật sau R002 ngày 12/11/2026, Asia/Bangkok: áp dụng [findings](../../reviews/payment-management/R002/findings.md) mục 4.2/4.3 đã được người dùng xác nhận. PAY-DEC-015 bổ sung vòng đời điều chỉnh; thêm 7 AC, giữ nguyên 30 mã AC cũ. Bằng chứng phiên bản/kiểm tra và trạng thái vòng tại [changes R002](../../reviews/payment-management/R002/changes.md).
 
 ## 1. Chỉ mục nguồn và cách đọc căn cứ
 
@@ -33,7 +34,7 @@ Mỗi mã S bên dưới luôn chỉ về `docs/requirements/btcohong.pdf`. Các
 | Suy ra trực tiếp | Hệ quả trực tiếp của phát biểu nguồn; phải nêu lập luận, không dùng để thêm nghiệp vụ |
 | Đề xuất kỹ thuật | Giải pháp tham khảo thuộc bước thiết kế, không phải yêu cầu gốc; hồ sơ BA này không chốt giải pháp |
 | Cần xác nhận | Chưa đủ căn cứ hoặc có mâu thuẫn; phải gắn mã PAY-ISS tương ứng |
-| Đã xác nhận | Nội dung có xác nhận thực tế trong decisions.md; hiện có PAY-DEC-001 đến PAY-DEC-014 |
+| Đã xác nhận | Nội dung có xác nhận thực tế trong decisions.md; hiện có PAY-DEC-001 đến PAY-DEC-015, phân biệt xác nhận đầu PRM-006 và bổ sung R002 |
 
 Trong bảng AC, cột **Căn cứ** phân loại bằng chứng, còn cột **Mức độ rõ/điểm mở** cho biết có thể chốt nội dung đến đâu. `Rõ` chỉ áp dụng cho mệnh đề đang xét. Các quy tắc đã xác nhận còn phụ thuộc dữ liệu nguồn, phân công nhân sự và thiết kế; không khẳng định ứng dụng đã triển khai.
 
@@ -68,6 +69,7 @@ Nguồn không chốt giao thức/API/database chung hoặc công nghệ. Không
 | Dòng thanh toán | Dịch vụ, sản lượng, đơn giá, thành tiền; có thể tách nhiều dòng theo hiệu lực giá | S02/PAY-03; PAY-DEC-008/009 |
 | Tổng chính thức | Tổng các thành tiền dòng đã HALF_UP đến 1 đồng; dùng cho hiển thị/trình/duyệt/bàn giao | PAY-DEC-009 |
 | Hồ sơ điều chỉnh | Hồ sơ liên kết bản Approved hiện hành, đầy đủ dòng/tổng sau điều chỉnh và chênh lệch/biên bản | S07; PAY-DEC-001 |
+| Điều chỉnh đang xử lý | Hồ sơ điều chỉnh Draft/PendingApproval/Rejected; tối đa một hồ sơ thuộc tập này cho mỗi chuỗi, tạm dừng bàn giao mới | PAY-DEC-015; xác nhận R002-F001, không phải thuật ngữ gốc PDF |
 | Draft | Được sửa trong phạm vi quyền, cập nhật nguồn chủ động, trình hoặc hủy | S03/S04/S08; PAY-DEC-006/007/012 |
 | PendingApproval | Lần trình hợp lệ đã ghi nhận, có người duyệt được giao; lỗi thông báo không đổi trạng thái | S03/S05; PAY-DEC-011/014 |
 | Approved | Nội dung đã duyệt được giữ nguyên; điều chỉnh hiệu lực qua hồ sơ khác đã duyệt | S03/S06/PAY-05; PAY-DEC-001 |
@@ -101,7 +103,7 @@ Không chốt kiểu số triển khai, PK/FK, lưu bản chụp/so sánh phiên
 
 ## 4. Phân tích user story và tiêu chí chấp nhận
 
-AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được cập nhật theo quyết định thật PRM-006, không thay phát biểu PDF. Mỗi US áp dụng toàn bộ điều kiện/ngoại lệ trong các PAY-DEC liên quan, kể cả phần chưa được viết thành AC riêng. Ví dụ chi tiết và kế hoạch bổ sung kiểm chứng ở decisions.md/issues.md là yêu cầu đã chấp thuận, chưa phải kết quả chạy ứng dụng.
+AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; 30 AC ban đầu theo PRM-006, 7 AC bổ sung sau R002 được ghi căn cứ riêng, không thay phát biểu PDF. Mỗi US áp dụng toàn bộ điều kiện/ngoại lệ trong các PAY-DEC liên quan, kể cả phần chưa được viết thành AC riêng. Ví dụ chi tiết và kế hoạch bổ sung kiểm chứng ở decisions.md/issues.md là yêu cầu đã chấp thuận, chưa phải kết quả chạy ứng dụng.
 
 ### 4.1 US-PAY-01 - Lập bảng thanh toán
 
@@ -128,6 +130,7 @@ AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được 
 - **Điều kiện trước:** Draft, đúng quyền, đủ dịch vụ bắt buộc, tổng chính thức và tổng trước làm tròn không âm; nguồn kiểm tra lại hợp lệ/không đổi nội dung tính tiền; có người duyệt hợp lệ; PAY-DEC-005/009/011/012.
 - **Luồng chính:** Kiểm tra điều kiện → xác định người duyệt theo tổng chính thức → ghi nhận một lần trình/PendingApproval, cố định nội dung/căn cứ → gửi thông báo, audit; PAY-DEC-002/011/012/014.
 - **Ngoại lệ:** Nguồn đổi/không đọc được hoặc thiếu người duyệt thì giữ Draft, chặn trình và nêu lý do. Lỗi gửi sau khi ghi nhận lần trình thì giữ PendingApproval, hiển thị chờ gửi lại; người duyệt xem được danh sách chờ. Tối đa 3 lần gửi lại trong 15 phút rồi vận hành theo dõi; dừng thông báo lỗi thời. Trình lặp trả lần trình hiện hữu, không sinh vòng/thông báo mới; PAY-DEC-012/014.
+- **Nguồn đổi có ảnh hưởng:** giữ cả Draft và số tiền đã lưu; không tự đổi tiền rồi trình ngay. Người phụ trách phải xem/chấp nhận cập nhật trước lần trình sau; PAY-DEC-012, AC-US-PAY-02-06.
 - **Đầu vào/ra:** Draft/tổng/căn cứ/phân công → một PendingApproval hoặc bị chặn; tình trạng gửi theo dõi riêng. **Quy tắc/NFR:** PAY-01/02/04/06/07, NFR-PAY-01; PAY-DEC-002/005/009/011/012/014.
 
 | Mã AC | Cho trước - Khi - Thì | Nguồn | Căn cứ | Mức độ rõ/điểm mở |
@@ -137,6 +140,8 @@ AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được 
 | AC-US-PAY-02-03 | Cho trước bảng thiếu dịch vụ bắt buộc trong thời gian hợp đồng áp dụng hoặc chưa xác định được danh sách; Khi trình; Thì chặn và nêu dữ liệu thiếu, không coi danh sách không đọc được là rỗng | S09/PAY-04; PAY-DEC-005 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
 | AC-US-PAY-02-04 | Cho trước tổng chính thức 0, tổng trước làm tròn không âm, đủ dịch vụ và điều kiện khác; Khi trình; Thì không chặn chỉ vì tổng 0; dòng sản lượng 0 phải có căn cứ đã đối soát | S09/PAY-04; PAY-DEC-005, PAY-DEC-009 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
 | AC-US-PAY-02-05 | Cho trước cùng lần trình bị lặp/đồng thời hoặc PendingApproval bị bấm Trình lại; Khi xử lý; Thì chỉ một lần trình được ghi nhận, trả lần hiện hữu; lỗi thông báo không đổi về Draft và gửi lại cùng tham chiếu theo giới hạn 3 lần/15 phút | S09/PAY-04; S03; PAY-DEC-014 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
+| AC-US-PAY-02-06 | Cho trước Draft đang lưu 100 triệu và nguồn liên quan đổi có ảnh hưởng thành 110 triệu; Khi người phụ trách trình; Thì chặn trình, thông báo khác biệt, giữ Draft và 100 triệu đến khi người phụ trách xem/chấp nhận cập nhật; không tự đổi tiền rồi trình ngay | S04/S05; S09/PAY-01, PAY-02, PAY-03; PAY-DEC-012; R002-F002 | Quy tắc đã xác nhận PRM-006; bổ sung AC theo findings R002 mục 4.3, PRM-011 | Chưa kiểm thử ứng dụng |
+| AC-US-PAY-02-07 | Cho trước Draft và không đọc được nguồn cần kiểm tra; Khi người phụ trách trình; Thì chặn trình, nêu nguồn chưa kiểm tra được, giữ Draft và số tiền đã lưu, không tạo PendingApproval | S05; S09/PAY-01, PAY-02; PAY-DEC-012; R002-F002 | Quy tắc đã xác nhận PRM-006; bổ sung AC theo findings R002 mục 4.3, PRM-011 | Chưa kiểm thử ứng dụng |
 
 ### 4.3 US-PAY-03 - Duyệt hoặc từ chối
 
@@ -145,7 +150,8 @@ AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được 
 - **Luồng chính:** Người được giao đủ điều kiện duyệt → Approved, audit. Một cấp theo ngưỡng, thao tác đồng thời chỉ một kết quả; PAY-DEC-002/011.
 - **Luồng thay thế:** Từ chối có lý do → Rejected; người phụ trách chủ động “Chỉnh sửa lại” → Draft, giữ lịch sử cũ. Không có lý do hoặc người lập tự duyệt/từ chối thì chặn. Thay người đúng thẩm quyền có audit/thông báo, người cũ mất quyền; PAY-DEC-003/011.
 - **Đầu vào/ra:** Bảng/tổng/người lập/người được giao/căn cứ nguồn/lý do → Approved hoặc Rejected, audit. KTT bàn giao thủ công ngoài module chỉ sau Approved, đối chiếu đúng lần duyệt và điều chỉnh; PAY-DEC-013.
-- **Quy tắc/NFR:** PAY-05/06/07/08, NFR-PAY-01; PAY-DEC-001/002/003/011/012/013.
+- **Điều kiện bàn giao của chuỗi:** tạm dừng bàn giao mới khi có điều chỉnh Draft/PendingApproval/Rejected. Chỉ tiếp tục theo bản Approved hiện hành khi không còn hồ sơ đang xử lý; điều chỉnh Approved dùng căn cứ mới đã duyệt, Cancelled không đổi căn cứ đã duyệt; PAY-DEC-015, mục 6.1.
+- **Quy tắc/NFR:** PAY-05/06/07/08, NFR-PAY-01; PAY-DEC-001/002/003/011/012/013/015.
 
 | Mã AC | Cho trước - Khi - Thì | Nguồn | Căn cứ | Mức độ rõ/điểm mở |
 | --- | --- | --- | --- | --- |
@@ -157,21 +163,26 @@ AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được 
 | AC-US-PAY-03-06 | Cho trước người được giao đủ quyền và lý do không rỗng; Khi từ chối; Thì Rejected, giữ nội dung/lịch sử; khi người phụ trách chọn Chỉnh sửa lại thì Draft và audit trước khi sửa/trình lại | S03; S09/PAY-08; PAY-DEC-003, PAY-DEC-011 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
 | AC-US-PAY-03-07 | Cho trước người không đúng vai trò/người được giao hoặc người cũ đã bị thay thế; Khi duyệt hoặc từ chối; Thì chặn; hai người thao tác đồng thời chỉ ghi một kết quả hợp lệ | S06; S09/PAY-06; PAY-DEC-002, PAY-DEC-011 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
 | AC-US-PAY-03-08 | Cho trước bảng chưa Approved; Khi bàn giao kế toán; Thì chưa đủ điều kiện; với Approved, KTT bàn giao thủ công đúng mã bảng/lần duyệt, lưu bằng chứng gửi/nhận, gửi lại không tạo nghĩa vụ tính tiền lần hai | S01, S06; PAY-DEC-001, PAY-DEC-013 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
+| AC-US-PAY-03-09 | Cho trước PendingApproval và nguồn liên quan đổi ảnh hưởng hoặc không còn hợp lệ; Khi người được giao duyệt; Thì chặn duyệt, giữ PendingApproval và nội dung/số tiền/căn cứ lần trình, thông báo người được giao; không tự sửa tiền hoặc tự từ chối. Khi người đó từ chối có lý do thì về Rejected theo AC-US-PAY-03-06 để người phụ trách mở lại Draft xử lý | S04/S05/S06; S09/PAY-01, PAY-02, PAY-03; PAY-DEC-003, PAY-DEC-012; R002-F002 | Quy tắc đã xác nhận PRM-006; bổ sung AC theo findings R002 mục 4.3, PRM-011 | Chưa kiểm thử ứng dụng |
+| AC-US-PAY-03-10 | Cho trước PendingApproval và không đọc được nguồn cần kiểm tra; Khi người được giao duyệt; Thì giữ PendingApproval và nội dung/số tiền/căn cứ lần trình để chờ kiểm tra, không tự Approved hoặc Rejected | S06; S09/PAY-01, PAY-02; PAY-DEC-012; R002-F002 | Quy tắc đã xác nhận PRM-006; bổ sung AC theo findings R002 mục 4.3, PRM-011 | Chưa kiểm thử ứng dụng |
 
 ### 4.4 US-PAY-04 - Điều chỉnh bảng đã duyệt
 
 - **Tác nhân/mục tiêu:** KTT lập hồ sơ điều chỉnh liên kết để xử lý sai sót, không sửa bản Approved; S07/PAY-05, PAY-DEC-001.
-- **Điều kiện trước:** Có bản Approved hiện hành, sai sót và căn cứ nguồn sửa hợp lệ; một hồ sơ đang xử lý/chuỗi. Trước trình phải đủ lý do/trước-sau/chênh lệch/biên bản có mã/ngày/các bên xác nhận. Ngoại lệ Active cho kỳ cũ của hợp đồng đã kết thúc theo PAY-DEC-012, không áp lập bảng thường.
+- **Điều kiện trước:** Có bản Approved hiện hành, sai sót và căn cứ nguồn sửa hợp lệ; không còn điều chỉnh Draft/PendingApproval/Rejected trong chuỗi khi lập hồ sơ khác (PAY-DEC-015). Trước trình phải đủ lý do/trước-sau/chênh lệch/biên bản có mã/ngày/các bên xác nhận. Ngoại lệ Active cho kỳ cũ của hợp đồng đã kết thúc theo PAY-DEC-012, không áp lập bảng thường.
 - **Luồng chính:** KTT lập Draft điều chỉnh đủ dòng/tổng mới → cập nhật số liệu từ nguồn có kiểm tra → đính biên bản/trình → người khác đủ cùng thẩm quyền duyệt theo tổng đầy đủ mới → hồ sơ Approved có hiệu lực; audit mọi thay đổi. Không cộng toàn bộ tổng mới vào cũ; chênh lệch giảm có thể âm nhưng tổng mới phải hợp lệ; PAY-DEC-001/002/006/008/009/011/012.
-- **Ngoại lệ:** Thiếu biên bản/nguồn/người duyệt thì chặn trình. Từ chối → Rejected → KTT phụ trách chủ động mở Draft; hủy Draft điều chỉnh không giải phóng kỳ gốc. Không có hiệu lực thay đổi khi chưa Approved; PAY-DEC-001/003/007.
+- **Ngoại lệ:** Thiếu biên bản/nguồn/người duyệt thì chặn trình. Rejected vẫn giữ vị trí và dừng bàn giao; KTT phụ trách mở lại chính hồ sơ sang Draft để sửa hoặc hủy. Muốn bỏ hồ sơ Rejected phải mở Draft rồi hủy đúng quyền trước khi tạo khác. Cancelled kết thúc giữ vị trí của chính hồ sơ, không khôi phục/đổi giá trị đã duyệt/giải phóng kỳ gốc. Chỉ điều chỉnh Approved có hiệu lực; quyền tạo tiếp và tiếp tục bàn giao kiểm tra toàn chuỗi theo mục 6.1; PAY-DEC-001/003/007/015.
 - **Đầu vào/ra:** Bản Approved/căn cứ sửa/biên bản → hồ sơ liên kết, tổng sau điều chỉnh/chênh lệch và lịch sử; bản gốc giữ nguyên, không chiếm thêm tháng. Phối hợp kế toán theo PAY-DEC-013, hóa đơn ngoài module.
-- **Quy tắc/NFR:** PAY-03/04/05/06/07/08, NFR-PAY-01; PAY-DEC-001/002/003/006/007/008/009/011/012/013.
+- **Quy tắc/NFR:** PAY-03/04/05/06/07/08, NFR-PAY-01; PAY-DEC-001/002/003/006/007/008/009/011/012/013/015.
 
 | Mã AC | Cho trước - Khi - Thì | Nguồn | Căn cứ | Mức độ rõ/điểm mở |
 | --- | --- | --- | --- | --- |
 | AC-US-PAY-04-01 | Cho trước Approved có sai sót, nguồn sửa hợp lệ và KTT lập hồ sơ có biên bản trước trình; Khi điều chỉnh; Thì bản gốc giữ nguyên, tạo hồ sơ liên kết duyệt riêng theo tổng đầy đủ mới; chỉ sau Approved mới có hiệu lực | S07; S09/PAY-05; PAY-DEC-001, PAY-DEC-002, PAY-DEC-008, PAY-DEC-009, PAY-DEC-011, PAY-DEC-012 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
 | AC-US-PAY-04-02 | Cho trước Draft điều chỉnh chưa có biên bản đủ mã/ngày/các bên xác nhận; Khi KTT trình điều chỉnh; Thì chặn trình, bản Approved hiện hành không đổi | S07; PAY-DEC-001 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
 | AC-US-PAY-04-03 | Cho trước một hồ sơ điều chỉnh được xử lý đúng quyền; Khi lưu thay đổi/chuyển trạng thái; Thì audit ai/lúc nào/nội dung trước-sau, liên kết bản Approved và chênh lệch, không cộng lặp tổng | S07, S10; PAY-DEC-001, PAY-DEC-006 | Đã xác nhận - PRM-006; đối chiếu nguồn PDF | Quy tắc đã chốt; chưa kiểm thử ứng dụng |
+| AC-US-PAY-04-04 | Cho trước chuỗi có một điều chỉnh ở Draft, PendingApproval hoặc Rejected (xét từng trạng thái); Khi KTT yêu cầu tạo điều chỉnh khác hoặc bàn giao mới của chuỗi; Thì chặn tạo khác và tạm dừng bàn giao mới; bản Approved hiện hành giữ nguyên, Rejected vẫn giữ vị trí điều chỉnh duy nhất | S07; PAY-DEC-001, PAY-DEC-003, PAY-DEC-013, PAY-DEC-015; R002-F001 | Đã xác nhận bổ sung tại findings R002 mục 4.2, PRM-011 | Ba biến thể trạng thái; chưa kiểm thử ứng dụng |
+| AC-US-PAY-04-05 | Cho trước điều chỉnh Rejected và KTT phụ trách đúng quyền; Khi mở lại chính hồ sơ sang Draft; Thì vẫn giữ vị trí và dừng bàn giao mới. Khi hủy Draft có lý do thì Cancelled, audit, không khôi phục/đổi giá trị đã duyệt/giải phóng kỳ gốc; khi không còn hồ sơ khác đang xử lý, được tiếp tục bàn giao theo bản Approved hiện hành và tạo hồ sơ điều chỉnh mã mới nếu đủ điều kiện | S07/S08/S10; PAY-DEC-003, PAY-DEC-007, PAY-DEC-013, PAY-DEC-015; R002-F001 | Đã xác nhận bổ sung tại findings R002 mục 4.2, PRM-011 | Bao phủ Rejected → Draft → Cancelled; chưa kiểm thử ứng dụng |
+| AC-US-PAY-04-06 | Cho trước điều chỉnh PendingApproval đủ điều kiện và người duyệt độc lập hợp lệ; Khi duyệt thành Approved; Thì kết thúc giữ vị trí của hồ sơ đó, dùng căn cứ mới đã duyệt, không cộng lặp tổng. Khi không còn hồ sơ khác đang xử lý thì được tiếp tục bàn giao và tạo điều chỉnh tiếp dựa trên bản Approved hiện hành nếu đủ điều kiện; nếu đã có điều chỉnh khác Draft/PendingApproval/Rejected thì vẫn chặn tạo thêm và dừng bàn giao mới dù hồ sơ trước đã Approved hoặc Cancelled | S06/S07; PAY-DEC-001, PAY-DEC-011, PAY-DEC-013, PAY-DEC-015; R002-F001 | Đã xác nhận bổ sung tại findings R002 mục 4.2, PRM-011 | Kiểm điều kiện toàn chuỗi; chưa kiểm thử ứng dụng |
 
 ### 4.5 US-PAY-05 - Hủy bảng nháp
 
@@ -179,7 +190,8 @@ AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được 
 - **Điều kiện trước:** Draft, đúng quyền, có lý do. Rejected cần mở lại Draft trước; không hủy PendingApproval/Approved; PAY-DEC-003/007.
 - **Luồng chính:** Hủy → Cancelled, lưu lý do/audit; không phục hồi/sửa/trình chính bảng đó; S03/S08/S10, PAY-DEC-007.
 - **Ngoại lệ/lập lại:** Bảng gốc Cancelled giải phóng kỳ; bảng mới có mã mới/tham chiếu bảng hủy/lý do, kiểm tra lại nguồn/cấu hình/chồng kỳ và lập đồng thời. Hủy điều chỉnh không giải phóng kỳ của bảng gốc Approved; PAY-DEC-004/007/012.
-- **Đầu vào/ra:** Draft/người xử lý/lý do → Cancelled và audit. **Quy tắc/NFR:** PAY-01/04, NFR-PAY-01; PAY-DEC-003/004/007/011/012.
+- **Hủy điều chỉnh sau từ chối:** KTT phụ trách mở Rejected → Draft rồi mới hủy có lý do/audit. Cancelled kết thúc giữ vị trí của hồ sơ đó; chỉ tạo điều chỉnh khác hoặc tiếp tục bàn giao khi không còn hồ sơ đang xử lý và đủ điều kiện, theo PAY-DEC-015 và AC-US-PAY-04-05/06.
+- **Đầu vào/ra:** Draft/người xử lý/lý do → Cancelled và audit. **Quy tắc/NFR:** PAY-01/04, NFR-PAY-01; PAY-DEC-003/004/007/011/012/015.
 
 | Mã AC | Cho trước - Khi - Thì | Nguồn | Căn cứ | Mức độ rõ/điểm mở |
 | --- | --- | --- | --- | --- |
@@ -189,15 +201,15 @@ AC dùng **Cho trước - Khi - Thì**. Giữ mã đã có; nội dung được 
 
 ## 5. Danh mục quy tắc nghiệp vụ
 
-Cột phát biểu nguồn giữ nguyên **PDF trang 2 mục 5, S09**. Cột áp dụng ghi quyết định đã xác nhận để xử lý mâu thuẫn/bổ sung; không sửa PDF hoặc tự ưu tiên rule hơn US. AC tương ứng nằm tại mục 4, NFR tại mục 7; áp dụng toàn văn quyết định trong decisions.md.
+Cột **Tóm lược phát biểu nguồn** diễn đạt rút gọn **PDF trang 2 mục 5, S09**, không phải trích nguyên văn. Cột áp dụng ghi quyết định đã xác nhận để xử lý mâu thuẫn/bổ sung; không sửa PDF hoặc tự ưu tiên rule hơn US. AC tương ứng nằm tại mục 4, NFR tại mục 7; áp dụng toàn văn quyết định trong decisions.md. Đổi nhãn khi biên tập theo tùy chọn F003, không thay đổi nghiệp vụ.
 
-| Mã | Phát biểu nguồn | Diễn giải áp dụng đã xác nhận | AC liên quan |
+| Mã | Tóm lược phát biểu nguồn | Diễn giải áp dụng đã xác nhận | AC liên quan |
 | --- | --- | --- | --- |
-| PAY-01 | Chỉ lập bảng cho hợp đồng Active và có bảng giá phù hợp. Mỗi hợp đồng chỉ có một bảng thanh toán cho mỗi tháng | Tháng/quý chống chồng mọi tháng của bảng chưa Cancelled, cho lập mới sau hủy; giá theo ngày dịch vụ; kiểm tra lại nguồn. Ngoại lệ Active chỉ cho điều chỉnh kỳ cũ có điều kiện. PAY-DEC-004/007/008/012 | AC-US-PAY-01-01/02/03/07/08, AC-US-PAY-05-03 |
-| PAY-02 | Sản lượng kỳ phải Đã đối soát trước khi lập | Giữ điều kiện đã đối soát lúc lập, kiểm tra lại trước trình/duyệt; cần phân bổ theo khoảng giá. PAY-DEC-008/012 | AC-US-PAY-01-01/04, AC-US-PAY-02-01, AC-US-PAY-03-01 đến 03 |
-| PAY-03 | Thành tiền mỗi dòng = sản lượng × đơn giá tại thời điểm tính | Giá theo ngày dịch vụ, đầu vào tối đa 6 số lẻ, HALF_UP dòng đến đồng rồi cộng tổng. PAY-DEC-008/009 | AC-US-PAY-01-01/05/06 |
+| PAY-01 | Chỉ lập bảng cho hợp đồng Active và có bảng giá phù hợp. Mỗi hợp đồng chỉ có một bảng thanh toán cho mỗi tháng | Tháng/quý chống chồng mọi tháng của bảng chưa Cancelled, cho lập mới sau hủy; giá theo ngày dịch vụ; kiểm tra lại nguồn. Ngoại lệ Active chỉ cho điều chỉnh kỳ cũ có điều kiện. PAY-DEC-004/007/008/012 | AC-US-PAY-01-01/02/03/07/08, AC-US-PAY-05-03; nguồn lỗi/đổi: AC-US-PAY-02-06/07, AC-US-PAY-03-09/10 |
+| PAY-02 | Sản lượng kỳ phải Đã đối soát trước khi lập | Giữ điều kiện đã đối soát lúc lập, kiểm tra lại trước trình/duyệt; cần phân bổ theo khoảng giá. PAY-DEC-008/012 | AC-US-PAY-01-01/04, AC-US-PAY-02-01, AC-US-PAY-03-01 đến 03; nguồn lỗi/đổi: AC-US-PAY-02-06/07, AC-US-PAY-03-09/10 |
+| PAY-03 | Thành tiền mỗi dòng = sản lượng × đơn giá tại thời điểm tính | Giá theo ngày dịch vụ, đầu vào tối đa 6 số lẻ, HALF_UP dòng đến đồng rồi cộng tổng; thay đổi căn cứ xử lý theo PAY-DEC-012. PAY-DEC-008/009 | AC-US-PAY-01-01/05/06; nguồn đổi: AC-US-PAY-02-06, AC-US-PAY-03-09 |
 | PAY-04 | Khi trình chặn tổng âm hoặc thiếu dòng dịch vụ bắt buộc; chống thao tác trình duyệt trùng | Danh sách bắt buộc từ hợp đồng hiệu lực; chặn tổng chính thức hoặc tổng trước làm tròn âm, không cấm 0; chống trình trùng, lỗi thông báo theo dõi riêng. PAY-DEC-005/009/014 | AC-US-PAY-02-01 đến 05 |
-| PAY-05 | Approved không được sửa dưới bất kỳ hình thức nào | Không sửa nội dung Approved, KTT lập hồ sơ liên kết/biên bản/duyệt riêng, chỉ bản điều chỉnh Approved có hiệu lực. PAY-DEC-001 | AC-US-PAY-04-01 đến 03 |
+| PAY-05 | Approved không được sửa dưới bất kỳ hình thức nào | Không sửa nội dung Approved, KTT lập hồ sơ liên kết/biên bản/duyệt riêng, chỉ bản điều chỉnh Approved có hiệu lực. Vòng đời/điều kiện chuỗi theo PAY-DEC-015 bổ sung PAY-DEC-001 | AC-US-PAY-04-01 đến 06 |
 | PAY-06 | Tổng tiền trên 500 triệu do GĐKD duyệt; còn lại KTT | Tổng chính thức từ 500 triệu là GĐKD, dưới là KTT, một cấp. PAY-DEC-002/009/011 | AC-US-PAY-03-01/02/03/07 |
 | PAY-07 | Người lập không được duyệt bảng do chính mình lập | Cấm người lập gốc và người lập điều chỉnh tự duyệt hoặc từ chối, phân công chính/thay thế cùng thẩm quyền. PAY-DEC-001/011 | AC-US-PAY-03-04/07 |
 | PAY-08 | Từ chối phải có lý do; bảng về Draft để NVKD sửa và trình lại | Từ chối có lý do → Rejected; phụ trách chủ động Chỉnh sửa lại → Draft, giữ lịch sử/audit. PAY-DEC-003/011 | AC-US-PAY-03-05/06, AC-US-PAY-01-06, AC-US-PAY-02-01 |
@@ -227,11 +239,25 @@ Tổng theo PAY-DEC-009; kiểm tra danh tính/ủy quyền theo PAY-DEC-001/011
 | Rejected | Chỉnh sửa lại / người phụ trách | Đúng phân công bảng/hồ sơ điều chỉnh | Draft trước sửa/hủy/trình mới | PAY-DEC-001/003/011; audit, giữ lý do cũ |
 | PendingApproval | Gửi lại thông báo / vận hành hoặc hệ thống | Cùng lần trình/người nhận hiện hành, chưa có kết quả xử lý | Giữ PendingApproval, không tạo vòng duyệt mới | PAY-DEC-014; lịch sử gửi/lỗi |
 | PendingApproval | Phân công lại / đầu mối có thẩm quyền | Người thay đủ cùng vai trò và độc lập | Giữ trạng thái, người cũ hết quyền | PAY-DEC-011; audit/thông báo người mới |
-| Approved | Lập hồ sơ điều chỉnh / KTT | Có sai sót/căn cứ hợp lệ, một hồ sơ đang xử lý | Bản gốc giữ nguyên, hồ sơ liên kết Draft | S07/S10; PAY-DEC-001/012; cần biên bản trước trình |
+| Approved | Lập hồ sơ điều chỉnh / KTT | Có sai sót/căn cứ hợp lệ, không còn điều chỉnh Draft/PendingApproval/Rejected trong chuỗi | Bản gốc giữ nguyên, hồ sơ liên kết Draft giữ vị trí điều chỉnh duy nhất | S07/S10; PAY-DEC-001/012/015; cần biên bản trước trình |
 | Draft | Hủy / người phụ trách | Đúng quyền, lý do hủy | Cancelled | S08/S10; PAY-DEC-007/011; audit |
 | Cancelled | Dùng lại chính bảng | Không được phép | Chặn phục hồi/sửa/trình | S08; PAY-DEC-007; bảng mới kiểm tra lại toàn bộ |
 
 Không hủy PendingApproval/Approved/Rejected trực tiếp. Không thêm hai cấp duyệt nối tiếp hoặc quyền sửa theo quyền xem. Lỗi gửi không đổi bảng về Draft; không đọc được nguồn trước duyệt thì giữ PendingApproval chờ kiểm tra, không tự từ chối.
+
+### 6.1 Điều chỉnh giữ vị trí duy nhất và điều kiện bàn giao mới
+
+**Đã xác nhận bổ sung - PAY-DEC-015, findings R002 mục 4.2.** Bảng dưới áp dụng cho hồ sơ điều chỉnh; không dùng Cancelled của điều chỉnh để giải phóng kỳ gốc.
+
+| Trạng thái hồ sơ điều chỉnh | Có được tạo điều chỉnh khác cùng chuỗi? | Bàn giao mới của chuỗi |
+| --- | --- | --- |
+| Draft | Không | Tạm dừng |
+| PendingApproval | Không | Tạm dừng |
+| Rejected | Không; mở lại chính hồ sơ này để sửa hoặc hủy | Tạm dừng |
+| Approved | Có, dựa trên bản Approved hiện hành và khi không có hồ sơ khác đang xử lý | Được tiếp tục theo căn cứ mới đã duyệt, nếu không có điều chỉnh khác đang xử lý |
+| Cancelled | Có, khi không có hồ sơ khác đang xử lý và vẫn đủ điều kiện lập điều chỉnh | Được tiếp tục theo bản Approved hiện hành, nếu không có điều chỉnh khác đang xử lý |
+
+Draft/PendingApproval/Rejected giữ vị trí duy nhất; mở lại Rejected → Draft không giải phóng vị trí. KTT phụ trách muốn bỏ hồ sơ phải mở Draft rồi hủy có lý do/audit. Approved/Cancelled kết thúc giữ vị trí của chính hồ sơ đó; vẫn kiểm tra toàn chuỗi trước tạo tiếp/bàn giao. Cancelled không phục hồi hoặc đổi giá trị đã duyệt. Bàn giao vẫn là công việc thủ công ngoài module theo PAY-DEC-013, có bằng chứng và chống tính tiền hai lần. AC-US-PAY-04-04/05/06 kiểm chứng các nhánh này.
 
 ## 7. Yêu cầu phi chức năng và cách kiểm chứng
 
@@ -257,29 +283,43 @@ Không tính một phản hồi chờ là Draft đã lưu. Không bỏ thời gi
 | Yêu cầu | Nguồn | Quy tắc liên quan | AC | Vấn đề đã giải quyết | Quyết định áp dụng và mức độ bàn giao |
 | --- | --- | --- | --- | --- | --- |
 | US-PAY-01 | S02/S04/S09 | PAY-01/02/03/05 | AC-US-PAY-01-01 đến AC-US-PAY-01-08 | PAY-ISS-004, PAY-ISS-005, PAY-ISS-006, PAY-ISS-007, PAY-ISS-008, PAY-ISS-009, PAY-ISS-010, PAY-ISS-011, PAY-ISS-012 | Đã xác nhận: PAY-DEC-004, PAY-DEC-005, PAY-DEC-006, PAY-DEC-007, PAY-DEC-008, PAY-DEC-009, PAY-DEC-010, PAY-DEC-011, PAY-DEC-012; bàn giao Design, chưa triển khai/kiểm thử |
-| US-PAY-02 | S03/S05/S09 | PAY-01/02/04/06/07 | AC-US-PAY-02-01 đến AC-US-PAY-02-05 | PAY-ISS-002, PAY-ISS-005, PAY-ISS-009, PAY-ISS-011, PAY-ISS-012, PAY-ISS-014 | Đã xác nhận: PAY-DEC-002, PAY-DEC-005, PAY-DEC-009, PAY-DEC-011, PAY-DEC-012, PAY-DEC-014; bàn giao Design, chưa triển khai/kiểm thử |
-| US-PAY-03 | S01/S03/S06/S09 | PAY-05/06/07/08 | AC-US-PAY-03-01 đến AC-US-PAY-03-08 | PAY-ISS-001, PAY-ISS-002, PAY-ISS-003, PAY-ISS-011, PAY-ISS-012, PAY-ISS-013 | Đã xác nhận: PAY-DEC-001, PAY-DEC-002, PAY-DEC-003, PAY-DEC-011, PAY-DEC-012, PAY-DEC-013; bàn giao Design, chưa triển khai/kiểm thử |
-| US-PAY-04 | S07/S09/S10 | PAY-03/04/05/06/07/08 | AC-US-PAY-04-01 đến AC-US-PAY-04-03 | PAY-ISS-001, PAY-ISS-002, PAY-ISS-003, PAY-ISS-006, PAY-ISS-007, PAY-ISS-008, PAY-ISS-009, PAY-ISS-011, PAY-ISS-012, PAY-ISS-013 | Đã xác nhận: PAY-DEC-001, PAY-DEC-002, PAY-DEC-003, PAY-DEC-006, PAY-DEC-007, PAY-DEC-008, PAY-DEC-009, PAY-DEC-011, PAY-DEC-012, PAY-DEC-013; bàn giao Design, chưa triển khai/kiểm thử |
-| US-PAY-05 | S03/S08/S09 | PAY-01/04 | AC-US-PAY-05-01 đến AC-US-PAY-05-03 | PAY-ISS-003, PAY-ISS-004, PAY-ISS-007, PAY-ISS-011, PAY-ISS-012 | Đã xác nhận: PAY-DEC-003, PAY-DEC-004, PAY-DEC-007, PAY-DEC-011, PAY-DEC-012; bàn giao Design, chưa triển khai/kiểm thử |
+| US-PAY-02 | S03/S05/S09 | PAY-01/02/04/06/07 | AC-US-PAY-02-01 đến AC-US-PAY-02-07 | PAY-ISS-002, PAY-ISS-005, PAY-ISS-009, PAY-ISS-011, PAY-ISS-012, PAY-ISS-014 | Đã xác nhận: PAY-DEC-002, PAY-DEC-005, PAY-DEC-009, PAY-DEC-011, PAY-DEC-012, PAY-DEC-014; F002 bổ sung AC, mục 8.3; chưa triển khai/kiểm thử |
+| US-PAY-03 | S01/S03/S06/S09 | PAY-05/06/07/08 | AC-US-PAY-03-01 đến AC-US-PAY-03-10; bàn giao chuỗi: AC-US-PAY-04-04 đến 06 | PAY-ISS-001, PAY-ISS-002, PAY-ISS-003, PAY-ISS-011, PAY-ISS-012, PAY-ISS-013 | Đã xác nhận: PAY-DEC-001, PAY-DEC-002, PAY-DEC-003, PAY-DEC-011, PAY-DEC-012, PAY-DEC-013, PAY-DEC-015; F001/F002, mục 8.3; chưa triển khai/kiểm thử |
+| US-PAY-04 | S07/S09/S10 | PAY-03/04/05/06/07/08 | AC-US-PAY-04-01 đến AC-US-PAY-04-06 | PAY-ISS-001, PAY-ISS-002, PAY-ISS-003, PAY-ISS-006, PAY-ISS-007, PAY-ISS-008, PAY-ISS-009, PAY-ISS-011, PAY-ISS-012, PAY-ISS-013 | Đã xác nhận: PAY-DEC-001, PAY-DEC-002, PAY-DEC-003, PAY-DEC-006, PAY-DEC-007, PAY-DEC-008, PAY-DEC-009, PAY-DEC-011, PAY-DEC-012, PAY-DEC-013, PAY-DEC-015; F001, mục 8.3; chưa triển khai/kiểm thử |
+| US-PAY-05 | S03/S08/S09 | PAY-01/04 | AC-US-PAY-05-01 đến AC-US-PAY-05-03; hủy điều chỉnh: AC-US-PAY-04-05/06 | PAY-ISS-001, PAY-ISS-003, PAY-ISS-004, PAY-ISS-007, PAY-ISS-011, PAY-ISS-012, PAY-ISS-013 | Đã xác nhận: PAY-DEC-003, PAY-DEC-004, PAY-DEC-007, PAY-DEC-011, PAY-DEC-012, PAY-DEC-013, PAY-DEC-015; F001, mục 8.3; chưa triển khai/kiểm thử |
 | NFR-PAY-01 | S07/S10 | Mọi thay đổi trạng thái/điều chỉnh | AC-NFR-PAY-01-01, AC-NFR-PAY-01-02 | PAY-ISS-001, PAY-ISS-003, PAY-ISS-006, PAY-ISS-007, PAY-ISS-011, PAY-ISS-012 | Đã xác nhận: PAY-DEC-001, PAY-DEC-003, PAY-DEC-006, PAY-DEC-007, PAY-DEC-011, PAY-DEC-012; bàn giao Design, chưa triển khai/kiểm thử |
 | NFR-PAY-02 | S10 | Điều kiện lập PAY-01/02/03 | AC-NFR-PAY-02-01 | PAY-ISS-010 | Đã xác nhận: PAY-DEC-010; bàn giao Design, chưa triển khai/kiểm thử |
 
-Truy vết từng PAY nằm ở mục 5; đủ 8 quy tắc và 14 quyết định. Design sẽ bổ sung component/API/UML/schema theo quyết định, không coi các tài liệu thiết kế chưa tạo là đã hoàn thành.
+Truy vết từng PAY nằm ở mục 5; đủ 8 quy tắc, 14 quyết định đầu và PAY-DEC-015 bổ sung sau R002. Design cần rà soát component/API/UML/schema trong bộ thiết kế đã có theo phân tích sửa; BA chưa thực hiện bước đó.
 
 ### 8.2 Phát hiện bổ sung và kết quả chốt
 
 | Mã vấn đề | Khoảng trống nguồn ban đầu | Quyết định hiện hành |
 | --- | --- | --- |
-| PAY-ISS-012 | PAY-01/02 ràng buộc lúc lập, chưa quy định nguồn đổi sau Draft hoặc trước duyệt | PAY-DEC-012: giữ căn cứ, kiểm tra lại/chặn/cập nhật chủ động; truy vết thêm US-PAY-03 và AC-US-PAY-03-01 đến 03 |
-| PAY-ISS-013 | S01 chỉ yêu cầu duyệt trước chuyển kế toán | PAY-DEC-013: KTT bàn giao thủ công có bằng chứng/đối chiếu, không tạo US thứ sáu hoặc trạng thái hóa đơn |
+| PAY-ISS-012 | PAY-01/02 ràng buộc lúc lập, chưa quy định nguồn đổi sau Draft hoặc trước duyệt | PAY-DEC-012: giữ căn cứ, kiểm tra lại/chặn/cập nhật chủ động; F002 bổ sung AC-US-PAY-02-06/07 và AC-US-PAY-03-09/10 tại mục 8.3 |
+| PAY-ISS-013 | S01 chỉ yêu cầu duyệt trước chuyển kế toán | PAY-DEC-013: KTT bàn giao thủ công có bằng chứng/đối chiếu; PAY-DEC-015 bổ sung điều kiện tạm dừng/tiếp tục của chuỗi, AC-US-PAY-04-04 đến 06; không thêm US hoặc trạng thái hóa đơn |
 | PAY-ISS-014 | S05/PAY-04 chưa có luồng lỗi gửi/thử lại | PAY-DEC-014: giữ PendingApproval, giới hạn gửi lại và vận hành theo dõi, không sinh trình trùng |
+
+### 8.3 Truy vết phần bổ sung sau R002
+
+Nguồn PDF xác định phạm vi US; kết quả bổ sung dưới đây căn cứ các quyết định và xác nhận thật tại findings R002 mục 4, không nhận là PDF đã quy định chi tiết.
+
+| Finding | Quyết định/vấn đề | US áp dụng | AC bổ sung | Kết quả mong đợi cần kiểm chứng |
+| --- | --- | --- | --- | --- |
+| payment-management-R002-F001 | PAY-DEC-015 bổ sung 001/003/007/013; PAY-ISS-001/003/007/013 | US-PAY-03/04 | AC-US-PAY-04-04 | Draft/PendingApproval/Rejected đều giữ vị trí; chặn tạo khác và dừng bàn giao mới |
+| payment-management-R002-F001 | PAY-DEC-015; PAY-ISS-001/003/007/013 | US-PAY-03/04/05 | AC-US-PAY-04-05 | Rejected → Draft vẫn giữ vị trí; hủy thành Cancelled kết thúc giữ vị trí của chính hồ sơ, giữ kỳ gốc/căn cứ Approved; tạo tiếp/bàn giao xét toàn chuỗi |
+| payment-management-R002-F001 | PAY-DEC-015; PAY-ISS-001/013 | US-PAY-03/04 | AC-US-PAY-04-06 | Approved dùng căn cứ mới, không cộng lặp; chỉ tạo tiếp/bàn giao khi không còn điều chỉnh đang xử lý |
+| payment-management-R002-F002 | PAY-DEC-012; PAY-ISS-012 | US-PAY-02 | AC-US-PAY-02-06 | Nguồn đổi 100 → 110 triệu trước trình: chặn, giữ Draft/100 triệu đến khi xem/chấp nhận cập nhật |
+| payment-management-R002-F002 | PAY-DEC-012; PAY-ISS-012 | US-PAY-02 | AC-US-PAY-02-07 | Không đọc được nguồn trước trình: chặn, giữ Draft và số tiền đã lưu |
+| payment-management-R002-F002 | PAY-DEC-012; PAY-ISS-012 | US-PAY-03 | AC-US-PAY-03-09 | Nguồn đổi/không hợp lệ trước duyệt: chặn, giữ PendingApproval/nội dung lần trình, thông báo; chỉ người được giao từ chối có lý do |
+| payment-management-R002-F002 | PAY-DEC-012; PAY-ISS-012 | US-PAY-03 | AC-US-PAY-03-10 | Không đọc được nguồn trước duyệt: giữ PendingApproval/nội dung lần trình chờ kiểm tra, không tự Approved/Rejected |
 
 ## 9. Bàn giao cho Design và việc còn cần thực hiện
 
 ### 9.1 Căn cứ đã chốt
 
-- PAY-DEC-001 đến PAY-DEC-014 là 14 quyết định đã được người dùng trong phiên xác nhận trong PRM-006; nguồn PDF vẫn giữ nguyên để đối chiếu. Không hỏi lại các lựa chọn đã chấp thuận.
-- Bàn giao đủ 5 US, 8 PAY rule, 2 NFR, 30 AC hiện có đã cập nhật, cùng các điều kiện/ngoại lệ và ví dụ chi tiết trong decisions.md. Các ví dụ/kiểm chứng đều chưa chạy trên ứng dụng.
+- PAY-DEC-001 đến PAY-DEC-014 giữ xác nhận PRM-006; PAY-DEC-015 ghi xác nhận bổ sung F001 ngày 12/11/2026 tại findings R002. Nguồn PDF giữ nguyên; không hỏi lại các lựa chọn đã chấp thuận.
+- Bàn giao đủ 5 US, 8 PAY rule, 2 NFR, **37 AC** gồm 30 mã cũ và 7 mã mới sau R002, cùng điều kiện/ngoại lệ và ví dụ trong decisions.md. Các ví dụ/kiểm chứng đều chưa chạy trên ứng dụng.
 - Phần mở rộng đã chốt gồm hồ sơ điều chỉnh riêng, phạm vi sửa/hủy/phân công, kiểm tra nguồn trước trình/duyệt, ngưỡng bao gồm 500 triệu, làm tròn/tổng, phép đo/tải, bàn giao và thử gửi lại.
 
 ### 9.2 Phụ thuộc thực hiện, không phải yêu cầu xác nhận lại nghiệp vụ
@@ -296,4 +336,10 @@ Nếu dữ liệu/nhân sự chưa đáp ứng thì áp đúng điều kiện ch
 
 ### 9.3 Giới hạn xác minh
 
-Lượt PRM-006 ghi nhận phê duyệt và đồng bộ hồ sơ BA; không tạo Design/UML/API/schema, không viết mã ứng dụng hoặc commit/baseline. Kiểm tra thực tế chỉ đối chiếu nội dung, mã, liên kết và truy vết tài liệu. Không có bằng chứng ứng dụng đã đạt audit, tính tiền, gửi thông báo hoặc phản hồi 3 giây; xem nhật ký prompt cho kiểm tra đã thực hiện.
+Lượt PRM-006 là lịch sử ghi nhận phê duyệt đầu tiên. PRM-011 chỉnh sửa BA sau R002, đối chiếu tài liệu và lưu phiên bản theo workflow hiện hành; bằng chứng thực tế tại changes R002. Không có kiểm thử ứng dụng, đo hiệu năng hoặc bàn giao kế toán thực tế trong lượt BA này.
+
+### 9.4 Nội dung Design cần tiếp nhận sau R002
+
+- Dùng PAY-DEC-015 và mục 6.1 làm căn cứ đồng bộ điều kiện tạo điều chỉnh, mở lại/hủy, duyệt và bàn giao; không suy Cancelled giải phóng kỳ gốc hoặc Rejected mất vị trí.
+- Bổ sung truy vết/kiểm chứng bốn AC nguồn đổi/không đọc được tại mục 8.3; giữ nguyên chính sách PAY-DEC-012. F003 chỉ đổi nhãn tóm lược nguồn, không tạo quyết định nghiệp vụ.
+- Các lựa chọn F001/F002 trong phạm vi R002 đã có căn cứ xác nhận; không còn câu hỏi nghiệp vụ chặn hai phần này. Phụ thuộc dữ liệu/nhân sự/môi trường tại mục 9.2 vẫn phải được đáp ứng. Bộ thiết kế đã có chưa được cập nhật hoặc tái phê duyệt trong lượt BA này; Design xử lý khi được giao.
