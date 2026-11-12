@@ -23,7 +23,7 @@ alwaysApply: true
 ## 3. Tính nhất quán và kiểm tra
 
 - Dùng cùng tên actor, entity, thuộc tính, trạng thái và hành động trong toàn bộ tài liệu.
-- Truy vết yêu cầu đến thiết kế, UML, API, dữ liệu và cách kiểm chứng. Yêu cầu bị chặn vẫn có dòng truy vết, mã vấn đề và lý do.
+- Ở giai đoạn phân tích và review đầu ra BA, truy vết nguồn → US/rule/NFR → AC → vấn đề/quyết định; chưa yêu cầu sản phẩm thiết kế. Ở giai đoạn Design, mở rộng truy vết đến thiết kế, UML, API, dữ liệu và cách kiểm chứng. Yêu cầu bị chặn vẫn có dòng truy vết, mã vấn đề và lý do.
 - Không tự thêm yêu cầu hiệu năng, bảo mật hoặc kiến trúc bắt buộc ngoài nguồn; đề xuất kỹ thuật phải được ghi nhãn và giải thích.
 - Ghi trung thực kiểm tra đã chạy, phạm vi và giới hạn. Không gọi việc đọc sơ đồ là đã render, không coi kế hoạch test là test đã chạy.
 - Không sửa mã ứng dụng khi chỉ được yêu cầu phân tích/thiết kế/review. Không tạo hàng loạt sơ đồ hoặc code không phục vụ yêu cầu.

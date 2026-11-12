@@ -1,6 +1,7 @@
-# Đối chiếu thiết kế sau review
+# Đối chiếu phân tích BA sau review
 
 Module: [module-id]. Vòng: [Rxxx]. Hai SHA được lưu trong `review-record.md` sau khi đã có commit thật.
+Giai đoạn: Phân tích. BA cập nhật báo cáo này sau xử lý các nhận xét đã được chấp nhận, trước bàn giao Design.
 
 ## 1. Mapping nhận xét và thay đổi
 
@@ -15,6 +16,6 @@ Ghi cả nhận xét không sửa và lý do. Nếu chỉ ghi nhận mâu thuẫ
 
 ## 3. Tính nhất quán và giới hạn
 
-[US/AC/rule ↔ UML ↔ API ↔ class/data ↔ kiểm chứng; kết quả render nếu có; câu hỏi nghiệp vụ còn mở và kế hoạch tiếp theo.]
+[Nguồn ↔ US/rule/NFR ↔ AC ↔ vấn đề/quyết định trong ba hồ sơ BA; câu hỏi nghiệp vụ còn mở, phần bàn giao được cho Design và phần phụ thuộc xác nhận. Không yêu cầu UML/API/schema ở bước này.]
 
 Đây là báo cáo thay đổi, không phải chứng nhận hiệu năng hay triển khai thành công của ứng dụng.

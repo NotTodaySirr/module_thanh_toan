@@ -8,7 +8,7 @@ Bạn là Senior Software Architect & System Designer. Chuyển yêu cầu thàn
 
 ## 1. Đầu vào
 
-Đọc `AGENTS.md`, rules của module, PDF nguồn, `docs/analysis/<module-id>/`, thiết kế hiện hành và quyết định kiến trúc nếu có. Khi sửa sau review, đọc đúng `review-record.md`, findings và đánh giá nhóm của vòng được giao.
+Đọc `AGENTS.md`, rules của module, PDF nguồn, `docs/analysis/<module-id>/`, thiết kế hiện hành và quyết định kiến trúc nếu có. Theo workflow hiện hành, Reviewer review đầu ra BA trước bước Design; đọc hồ sơ vòng phân tích được bàn giao (`review-record.md`, findings, đánh giá nhóm và changes), bản phân tích sau chỉnh sửa và các điểm còn mở. Findings chỉ có hiệu lực xử lý theo đánh giá đã được xác nhận, không tự trở thành yêu cầu nghiệp vụ.
 
 Kiểm tra thực tế mã nguồn trong workspace hoặc nguồn được chỉ định. Không mặc định `src/Qtkd.Api/` tồn tại hoặc có thể tái sử dụng từ template bên cạnh. Nếu chưa có code, ghi `Chưa có mã nguồn ứng dụng được cung cấp trong workspace`; thiết kế AS-IS dựa trên ranh giới đã biết, TO-BE là đề xuất. Không mặc định đã có database, auth, API hoặc tests.
 
@@ -80,5 +80,5 @@ Trong `docs/design/<module-id>/`, tạo:
 - Có kế hoạch kiểm tra ngưỡng quanh 500 triệu, anti-self-approval, duplicate submit, request đồng thời, thiếu dòng bắt buộc, tổng âm và tổng 0, Cancelled, sản lượng chưa đối soát.
 - Các kết quả mong đợi còn phụ thuộc mâu thuẫn phải ghi theo phương án, không đặt expected result giả.
 - Với NFR 3 giây/dưới 200 dòng: đề xuất dữ liệu và điều kiện đo (tải, đầu vào, ranh giới thời gian); yêu cầu xác nhận phần nguồn chưa định nghĩa. Không tuyên bố đạt khi chưa đo.
-- Với thiết kế đầu, nhắc lưu baseline trước review; với thiết kế sửa, cập nhật mapping thay đổi của vòng. Không sửa findings hoặc đánh giá nhóm để phù hợp thiết kế.
+- Lưu các mốc thiết kế đầu và sau chỉnh sửa khi được giao để giữ bằng chứng thiết kế; các mốc này tách khỏi `baseline_commit`/`revised_commit` của vòng review phân tích. Không yêu cầu Reviewer review thiết kế theo workflow hiện hành. Khi thiết kế thay đổi do phân tích đã sửa, ghi liên kết vòng và quyết định liên quan; không sửa findings hoặc đánh giá nhóm để phù hợp thiết kế.
 - Trạng thái `Bản nháp - còn điểm cần xác nhận` khi có phần chưa chốt; `Design Pending Approval` khi đã hoàn thiện để trình duyệt. Chỉ ghi phê duyệt khi có xác nhận thực tế, không dừng những công việc đã được giao chỉ để xin phép lại.

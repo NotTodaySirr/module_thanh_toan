@@ -7,7 +7,9 @@ Mở `module_thanh_toan/` làm thư mục gốc trong công cụ để tránh n�
 
 Chuyển đặc tả `btcohong.pdf` thành thiết kế có căn cứ, đánh giá kết quả AI và chứng minh thay đổi sau review. Bộ hướng dẫn viết bằng tiếng Việt, kế thừa phương pháp BA, HLD/LLD, UML và truy vết của template QTKD.
 
-Đây là bộ hướng dẫn và biểu mẫu, chưa phải bộ thiết kế hoàn chỉnh hay kết quả review thực tế. Workspace đã có repository Git khi kiểm tra cuối lượt thiết lập. Commit khởi tạo hướng dẫn không thay thế baseline thiết kế lần đầu; các mốc thiết kế trước/sau review phải được lưu trong quá trình làm bài.
+Workflow hiện hành: **BA → Reviewer phân tích → nhóm đánh giá → BA chỉnh sửa → Design**. Reviewer chỉ kiểm tra đầu ra phân tích của BA; không review thiết kế hoặc toàn bộ quy trình. Commit khởi tạo hướng dẫn không thay thế baseline phân tích. Các mốc thiết kế được lưu riêng khi làm sản phẩm bài tập.
+
+Hồ sơ review thiết kế và baseline đã có là bằng chứng lịch sử theo workflow cũ, không đổi tên, ghi đè hoặc diễn giải lại thành review phân tích. Áp dụng workflow mới cho lượt tiếp theo, dùng số vòng chưa tồn tại trong module.
 
 ## 2. Cấu trúc và phân loại
 
@@ -15,7 +17,6 @@ Chuyển đặc tả `btcohong.pdf` thành thiết kế có căn cứ, đánh gi
 module_thanh_toan/
 ├── AGENTS.md                              # Điểm vào cho công cụ đọc AGENTS.md
 ├── README.md                              # Cách sử dụng và trình tự làm bài
-├── btcohong.pdf                           # Đặc tả gốc, không sửa
 ├── .cursor/
 │   ├── rules/
 │   │   ├── general-design.mdc             # Nguyên tắc dùng chung
@@ -24,9 +25,10 @@ module_thanh_toan/
 │   └── agents/
 │       ├── ba.md                          # Phân tích yêu cầu
 │       ├── design.md                      # Thiết kế kiến trúc và chi tiết
-│       └── reviewer.md                    # Đánh giá độc lập thiết kế
+│       └── reviewer.md                    # Review đầu ra BA trước Design
 └── docs/
-    ├── analysis/payment-management/       # Vấn đề và xác nhận nghiệp vụ
+    ├── requirements/btcohong.pdf          # Đặc tả gốc, không sửa
+    ├── analysis/payment-management/       # Đầu ra BA được Reviewer kiểm tra
     ├── design/payment-management/         # Bộ thiết kế hiện hành
     ├── reviews/
     │   ├── README.md                      # Cách tổ chức các vòng review
@@ -43,28 +45,28 @@ Trong công cụ hỗ trợ định dạng `.cursor`, sử dụng các rules và
 
 Ví dụ prompt BA:
 
-> Đọc AGENTS.md và .cursor/agents/ba.md. Phân tích module payment-management từ btcohong.pdf. Cập nhật hồ sơ phân tích, nêu mâu thuẫn và câu hỏi kèm lý do; chưa chọn phương án nghiệp vụ khi chưa có xác nhận. Tiếp tục các phần không phụ thuộc câu trả lời.
+> Đọc AGENTS.md và .cursor/agents/ba.md. Phân tích module payment-management từ docs/requirements/btcohong.pdf. Cập nhật ba hồ sơ phân tích, nêu mâu thuẫn và câu hỏi kèm lý do; chưa chọn phương án nghiệp vụ khi chưa có xác nhận. Tiếp tục các phần không phụ thuộc câu trả lời. Bàn giao đầu ra BA cho Reviewer trước Design.
 
-Ví dụ prompt Design:
+Ví dụ prompt Reviewer, sau khi BA hoàn thành lượt phân tích và đã có baseline commit thật:
 
-> Đọc .cursor/agents/design.md và hồ sơ phân tích payment-management. Tạo bộ thiết kế lần đầu, truy vết đầy đủ; phần chưa xác nhận trình bày phương án và ảnh hưởng, không biến giả định thành quy tắc chính thức.
+> Đọc .cursor/agents/reviewer.md. Review đầu ra phân tích BA của payment-management tại docs/analysis/payment-management/, vòng [Rxxx mới chưa tồn tại], baseline commit [SHA đầy đủ]. Đối chiếu requirements-analysis.md, issues.md, decisions.md với PDF và xác nhận liên quan. Không review thiết kế, không sửa hồ sơ BA và không tự điền đánh giá của nhóm.
 
-Ví dụ prompt Reviewer, sau khi đã có baseline commit thật:
+Ví dụ prompt BA chỉnh sửa sau review:
 
-> Đọc .cursor/agents/reviewer.md. Review module payment-management, vòng R001, baseline commit [SHA đầy đủ]. Ghi nhận phát hiện có căn cứ; không sửa bộ thiết kế và không tự điền đánh giá của nhóm.
+> Cập nhật phân tích payment-management theo các nhận xét đã được nhóm đánh giá trong [Rxxx]. Tuân thủ quyết định nghiệp vụ đã xác nhận; giữ các vấn đề chưa có quyết định ở trạng thái Cần xác nhận. Cập nhật changes.md và truy vết để bàn giao Design.
 
-Ví dụ prompt chỉnh sửa:
+Ví dụ prompt Design, sau khi đã xử lý review phân tích:
 
-> Cập nhật thiết kế payment-management theo các nhận xét đã được nhóm đánh giá trong R001. Tuân thủ quyết định nghiệp vụ đã xác nhận; giữ các vấn đề chưa có quyết định ở trạng thái Cần xác nhận. Cập nhật changes.md và truy vết.
+> Đọc .cursor/agents/design.md, bản phân tích payment-management sau chỉnh sửa và hồ sơ review [Rxxx]. Tạo bộ thiết kế, truy vết đầy đủ; phần chưa xác nhận trình bày phương án và ảnh hưởng, không biến giả định thành quy tắc chính thức.
 
 ## 4. Trình tự và quản lý phiên bản
 
-1. BA đọc đủ ba trang PDF, cập nhật phân tích, vấn đề và câu hỏi. Nhóm xác nhận các lựa chọn nghiệp vụ cần quyết định; ghi đúng người và căn cứ xác nhận.
-2. Design tạo bộ thiết kế hiện hành. Lần đầu có thể còn điểm mở nhưng phải thể hiện rõ; không sửa lại để che lỗi trước khi lưu baseline review.
-3. Lưu phiên bản lần đầu bằng Git trước khi Reviewer làm việc. Mỗi review có `baseline_commit` là SHA đầy đủ của commit đã chứa thiết kế được review.
-4. Tạo hồ sơ `docs/reviews/payment-management/R001/` từ bốn biểu mẫu. Reviewer ghi findings; nhóm đánh giá đúng/sai/thừa và hướng xử lý.
-5. Design sửa theo nhận xét đã được chấp nhận và quyết định đã có. Lưu bằng một commit chứa thiết kế đã sửa. Ghi SHA đó vào `revised_commit`, cập nhật báo cáo và lưu hồ sơ review bằng commit tiếp theo. Cách tách này tránh yêu cầu một commit phải chứa chính SHA của nó.
-6. R002, R003... tiếp tục cùng cơ chế. Không tạo lại hay ghi đè R001. Mỗi module có chuỗi số vòng riêng.
+1. BA đọc đủ ba trang PDF, hoàn thành requirements-analysis.md, issues.md, decisions.md. Ghi đúng người và căn cứ các xác nhận đã có; phần chưa rõ giữ trạng thái và câu hỏi, không cần chờ tất cả câu trả lời để review.
+2. Lưu baseline phân tích bằng Git trước khi Reviewer làm việc. `baseline_commit` là SHA đầy đủ của commit chứa ba đầu ra BA cùng nguồn/xác nhận liên quan, không cần có thiết kế.
+3. Tạo vòng mới `docs/reviews/payment-management/Rxxx/` từ bốn biểu mẫu, ghi giai đoạn `Phân tích`. Reviewer chỉ kiểm tra đầu ra BA và ghi findings; nhóm đánh giá đúng/sai/thừa và hướng xử lý.
+4. BA sửa theo nhận xét đã được chấp nhận và quyết định đã có. Commit phân tích đã sửa, ghi SHA vào `revised_commit`, cập nhật changes.md và lưu hồ sơ review bằng commit tiếp theo. Cách tách này tránh yêu cầu một commit phải chứa chính SHA của nó.
+5. Đối chiếu các thay đổi, bàn giao bản phân tích và điểm còn mở cho Design. Design tạo/cập nhật bộ thiết kế dựa trên phân tích sau review; lưu mốc thiết kế riêng khi được giao.
+6. Các vòng phân tích tiếp theo dùng cùng cơ chế. Không tạo lại hay ghi đè vòng cũ, kể cả vòng từng review thiết kế. Mỗi module có chuỗi số vòng riêng.
 
 Sử dụng repository hiện có. Nếu tái sử dụng bộ hướng dẫn ở workspace khác chưa thuộc repository, khởi tạo Git tại workspace đó hoặc dùng repository cha đã được nhóm chọn. Không khởi tạo repository lồng nhau khi đã có repository cha. Không tự cấu hình danh tính Git thay thành viên.
 
@@ -72,23 +74,24 @@ Ví dụ lệnh PowerShell, chạy từ workspace sau khi đã tạo tài liệu
 
 ```powershell
 git status
-git add -- AGENTS.md README.md .cursor btcohong.pdf docs/analysis docs/design docs/process
-git commit -m "docs(payment-management): lưu thiết kế ban đầu trước review R001"
+git add -- docs/analysis/payment-management docs/requirements docs/process
+git commit -m "docs(payment-management): lưu baseline phân tích BA trước review"
 git rev-parse HEAD
 ```
 
-Lưu SHA vừa trả về vào `review-record.md`. Sau khi sửa thiết kế theo review:
+Lưu SHA vừa trả về vào `review-record.md` của vòng mới. Sau khi BA sửa phân tích theo review:
 
 ```powershell
-git add -- docs/design/payment-management docs/analysis/payment-management
-git commit -m "docs(payment-management): cập nhật thiết kế theo review R001"
+git add -- docs/analysis/payment-management
+git commit -m "docs(payment-management): cập nhật phân tích BA theo review"
 git rev-parse HEAD
 # Ghi SHA vào revised_commit, hoàn thiện hồ sơ review và nhật ký trước khi lưu tiếp.
-git add -- docs/reviews/payment-management/R001 docs/process
-git commit -m "docs(payment-management): lưu bằng chứng review R001"
+# Thay Rxxx bằng số vòng mới đã được giao.
+git add -- docs/reviews/payment-management/Rxxx docs/process
+git commit -m "docs(payment-management): lưu bằng chứng review phân tích"
 ```
 
-Các lệnh trên lưu hai thời điểm thiết kế và hồ sơ giải thích; chúng không tự tạo tài liệu hay xác nhận nghiệp vụ. Chỉ lưu baseline thiết kế sau khi đã có các tài liệu thiết kế thật, không dùng riêng README hoặc biểu mẫu trống. Trước mỗi commit, xem diff và chỉ stage các file đúng nhiệm vụ. Không dùng lệnh reset/rebase/amend để thay lịch sử đã dùng làm bằng chứng. Nếu Git không dùng được, ghi rõ bước lưu phiên bản chưa hoàn tất; không tuyên bố đã đáp ứng yêu cầu 3. Bộ hướng dẫn này chọn phương án lịch sử Git được đề cho phép.
+Các lệnh trên lưu hai thời điểm phân tích và hồ sơ giải thích; chúng không tự tạo tài liệu hay xác nhận nghiệp vụ. Chỉ lưu baseline khi đã có ba hồ sơ BA thật, không dùng riêng README hoặc biểu mẫu trống. Trước mỗi commit, xem diff và chỉ stage các file đúng nhiệm vụ. Không dùng reset/rebase/amend để thay lịch sử đã dùng làm bằng chứng. Nếu Git không dùng được, ghi rõ bước lưu phiên bản chưa hoàn tất. Mốc thiết kế đầu/sau chỉnh sửa theo yêu cầu bài tập lưu riêng; review phân tích không tự chứng minh đã có hai phiên bản thiết kế.
 
 ## 5. Đối chiếu sản phẩm bài tập, trang 3
 
@@ -96,7 +99,7 @@ Các lệnh trên lưu hai thời điểm thiết kế và hồ sơ giải thíc
 | --- | --- |
 | 1. Workspace agent, rules, thiết kế | `.cursor/` và `docs/design/payment-management/` |
 | 2. Báo cáo vấn đề và đánh giá Reviewer | `docs/analysis/payment-management/issues.md`, `docs/reviews/payment-management/Rxxx/` |
-| 3. Thiết kế lần đầu và sau review | Hai commit thật, SHA trong `review-record.md`, diff trong `changes.md` |
+| 3. Thiết kế lần đầu và sau review | Lưu mốc thiết kế và diff riêng trong `docs/process/baselines/`; `baseline_commit`/`revised_commit` trong vòng mới chỉ chứng minh thay đổi phân tích BA. Không tự tuyên bố hai mốc phân tích đáp ứng yêu cầu phiên bản thiết kế |
 | 4. Nhật ký prompt và phân công | `docs/process/prompt-log.md`, `task-allocation.md` |
 | 5. Tối đa 5 slide | Nội dung theo `docs/process/presentation-outline.md`; phải tạo slide thực tế khi làm sản phẩm cuối |
 

@@ -1,6 +1,7 @@
 # Nhận xét của AI Reviewer
 
 Module: [module-id]. Vòng: [Rxxx]. Baseline: [SHA đầy đủ khớp review-record.md].
+Giai đoạn: Phân tích - review đầu ra BA trước Design; phạm vi ba hồ sơ trong `docs/analysis/<module-id>/`.
 Trạng thái ban đầu: chưa có nhận xét thực tế. Không dùng dòng ví dụ làm finding.
 
 ## Danh sách
@@ -12,6 +13,6 @@ ID: `<module-id>-R001-F001`... Loại và mức độ theo `.cursor/agents/revie
 
 ## Giới hạn review
 
-[File không đọc được, công cụ không chạy được, sơ đồ chưa render, hoặc thông tin nguồn chưa rõ. Nếu không phát hiện lỗi, nêu phạm vi đã kiểm tra thay vì bảo đảm không còn lỗi.]
+[Hồ sơ BA/nguồn không đọc được, công cụ không chạy được hoặc thông tin nguồn chưa rõ. Nếu không phát hiện lỗi, nêu phạm vi đã kiểm tra thay vì bảo đảm không còn lỗi. Thiếu sản phẩm thiết kế không phải finding trong vòng phân tích.]
 
-Reviewer không điền kết luận đúng/sai/thừa thay nhóm và không sửa thiết kế trong lượt review này.
+Reviewer không điền kết luận đúng/sai/thừa thay nhóm, không sửa hồ sơ BA và không review/sửa thiết kế trong lượt này.

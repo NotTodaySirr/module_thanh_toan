@@ -1,23 +1,25 @@
 ---
-description: Lưu phiên bản thiết kế và bằng chứng review theo module và từng vòng bằng Git
+description: Lưu phiên bản phân tích BA và bằng chứng review trước Design theo module và từng vòng bằng Git
 alwaysApply: true
 ---
 # Quy trình phiên bản và review
 
 ## 1. Định danh
 
-- Bộ thiết kế hiện hành: `docs/design/<module-id>/`. Một module gồm nhiều US liên quan, không tạo bộ tài liệu trùng cho từng US.
+- Phạm vi Reviewer: ba hồ sơ BA trong `docs/analysis/<module-id>/` sau lượt phân tích, trước bước Design. Một module gồm nhiều US liên quan, không tạo bộ tài liệu trùng cho từng US.
+- Bộ thiết kế hiện hành ở `docs/design/<module-id>/` thuộc bước sau; không nằm trong phạm vi Reviewer. Mốc thiết kế vẫn lưu riêng khi được giao, không dùng để tuyên bố đã review phân tích.
 - Hồ sơ vòng review: `docs/reviews/<module-id>/R001/`, `R002/`... Số vòng tăng trong phạm vi module; không dùng tên `first-run` hoặc `after-review` làm nơi lưu thiết kế.
 - Commit Git định danh phiên bản; mã vòng định danh hoạt động review. Trường `Version` trong dữ liệu ứng dụng không thay thế lịch sử tài liệu.
 - Đường dẫn trong hồ sơ review phải được tính từ workspace, ghi cả repository root và tiền tố đường dẫn nếu repository gốc nằm ở thư mục cha.
+- Workflow hiện hành: BA hoàn thành phân tích → lưu baseline phân tích → Reviewer → nhóm đánh giá → BA chỉnh sửa/đối chiếu → bàn giao Design. Giữ nguyên hồ sơ review thiết kế và mốc Git đã có như lịch sử; vòng mới dùng số chưa tồn tại và ghi giai đoạn `Phân tích`.
 
 ## 2. Baseline trước review
 
 - Kiểm tra repository và thay đổi hiện có trước khi thao tác. Không stage file không liên quan, không sửa danh tính Git, không tự push hay thay lịch sử.
-- Khi có nhiệm vụ lưu mốc phiên bản, tạo commit thiết kế trước khi Reviewer bắt đầu. Nếu chỉ đang soạn bản nháp, không cần commit mọi chỉnh sửa nhỏ.
-- Lưu SHA đầy đủ của baseline thật vào trường `baseline_commit` cùng danh sách đường dẫn được review. Không điền SHA giả, không đổi baseline sau khi đã phát hành findings. Commit chỉ chứa instructions hoặc biểu mẫu trống không phải baseline thiết kế.
+- Khi có nhiệm vụ lưu mốc phiên bản, tạo commit đầu ra BA đã hoàn thành lượt phân tích trước khi Reviewer bắt đầu. Nếu chỉ đang soạn bản nháp, không cần commit mọi chỉnh sửa nhỏ. Không cần đợi Design hoặc tất cả câu hỏi nghiệp vụ được trả lời; BA phải ghi rõ phần còn mở.
+- Lưu SHA đầy đủ của baseline thật vào trường `baseline_commit` cùng ba đường dẫn hồ sơ BA được review và nguồn/xác nhận liên quan. Không điền SHA giả, không đổi baseline sau khi đã phát hành findings. Commit chỉ chứa instructions hoặc biểu mẫu trống không phải baseline phân tích. Nếu commit có cả thiết kế, chỉ review phạm vi BA đã khai báo.
 - Reviewer đọc phiên bản đúng tại baseline. Nếu working tree khác baseline, dùng nội dung từ commit để review; nếu không đọc được commit, dừng phần đánh giá phụ thuộc phiên bản và nêu trở ngại, không coi working tree là baseline.
-- Với vòng đầu, ghi `Loại mốc: Thiết kế lần chạy đầu`. Không sửa ngược phiên bản đầu để làm bằng chứng tốt hơn.
+- Với vòng phân tích đầu, ghi `Loại mốc: Phân tích BA lần đầu`; vòng sau ghi `Vòng cải tiến phân tích tiếp theo`. Không sửa ngược phiên bản đầu để làm bằng chứng tốt hơn.
 
 ## 3. Bốn tài liệu mỗi vòng
 
@@ -34,13 +36,14 @@ Mã finding: `<module-id>-R001-F001`, tăng dần trong vòng. Vấn đề đặ
 
 - Chỉ sửa theo đánh giá đã được người dùng/nhóm xác nhận; dùng xác nhận có sẵn, không hỏi lại. Nhận xét thuần kỹ thuật thuộc phạm vi được giao có thể được xử lý theo thẩm quyền đó và ghi rõ căn cứ.
 - Không coi việc chấp nhận một finding về mâu thuẫn là đã chọn phương án nghiệp vụ. Nếu phương án chưa được xác nhận, cập nhật mô tả vấn đề và đánh dấu phần còn bị chặn.
-- Commit bộ thiết kế sau chỉnh sửa trước; lấy SHA thật, điền `revised_commit`, rồi commit hồ sơ review. Không yêu cầu tài liệu chứa SHA của chính commit chứa nó.
-- So sánh baseline và revised commit bằng Git diff theo đúng đường dẫn module; kiểm tra các sơ đồ, API, dữ liệu và truy vết cùng thay đổi. Ghi lệnh và kết quả kiểm tra thực tế.
+- BA cập nhật ba hồ sơ phân tích theo nhận xét đã được chấp nhận. Commit phân tích sau chỉnh sửa trước; lấy SHA thật, điền `revised_commit`, rồi commit hồ sơ review. Không yêu cầu tài liệu chứa SHA của chính commit chứa nó.
+- So sánh baseline và revised commit bằng Git diff theo `docs/analysis/<module-id>/`; kiểm tra US/AC/rule/NFR, vấn đề, quyết định và truy vết cùng thay đổi. Ghi lệnh và kết quả kiểm tra thực tế. Không yêu cầu UML/API/schema hoặc đo hiệu năng ở bước này.
 - Không dùng reset, rebase hoặc amend để thay các commit đã được hồ sơ review tham chiếu. Sửa sai bằng commit mới và vòng/phụ lục có giải thích.
 - Không đóng vòng chỉ vì đã có hai SHA. Phải có đánh giá nhóm, mapping thay đổi, kết quả kiểm tra và ghi rõ các điểm còn mở.
+- Sau xử lý review, BA bàn giao bản phân tích đã đối chiếu cùng hồ sơ vòng cho Design; liệt kê phần thiết kế được và phần phụ thuộc xác nhận. Review phân tích không phải phê duyệt nghiệp vụ hoặc thiết kế.
 
 ## 5. Trạng thái
 
 `Chuẩn bị` → `Đang review` → `Chờ đánh giá nhóm` → `Đang chỉnh sửa` → `Đã đối chiếu`.
 
-`Đã đối chiếu` chỉ mô tả vòng review; không đồng nghĩa nghiệp vụ đã xác nhận hết hay thiết kế đã phê duyệt. Nếu còn vấn đề, ghi danh sách và tác động. Thiếu Git hoặc thiếu baseline thì ghi `Chưa lưu được mốc phiên bản`, không bịa lịch sử hay tạo hai bản sao rồi tuyên bố đã có commit.
+`Đã đối chiếu` chỉ mô tả vòng review phân tích; không đồng nghĩa nghiệp vụ đã xác nhận hết hay phân tích/thiết kế đã phê duyệt. Nếu còn vấn đề, ghi danh sách và tác động khi bàn giao Design. Thiếu Git hoặc thiếu baseline thì ghi `Chưa lưu được mốc phiên bản`, không bịa lịch sử hay tạo hai bản sao rồi tuyên bố đã có commit.

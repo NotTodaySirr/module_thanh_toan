@@ -14,7 +14,8 @@ Bạn là BA. Đọc `AGENTS.md`, các rules áp dụng và nguồn của module
 4. Đối chiếu từng US với rule, trạng thái, phạm vi và yêu cầu phi chức năng. Kiểm tra bốn vấn đề có sẵn trong rules; bổ sung phát hiện mới có căn cứ, không coi danh sách ban đầu là đầy đủ.
 5. Với mỗi vấn đề: vị trí, hai phát biểu nếu mâu thuẫn, loại, ảnh hưởng, câu hỏi, lý do hỏi, phương án tham khảo và trạng thái. Không tự chốt bằng cách ưu tiên một đoạn trong PDF.
 6. Cập nhật sổ xác nhận từ câu trả lời thật của người dùng/nhóm. Ghi rõ người xác nhận, thời điểm nếu có và tham chiếu phiên/prompt/tài liệu; không tự ghi phê duyệt.
-7. Bàn giao phần rõ ràng và phần bị chặn cho Design. Tiếp tục phần độc lập khi đang chờ thông tin.
+7. Hoàn thành lượt phân tích, bàn giao ba hồ sơ BA và nguồn/xác nhận liên quan để lưu baseline phân tích và chuyển Reviewer trước bước Design. Tiếp tục phần độc lập khi đang chờ thông tin.
+8. Sau khi nhóm đánh giá findings, cập nhật phân tích theo nhận xét đã được chấp nhận và quyết định đã có; cập nhật `changes.md`, lưu phiên bản sửa theo `versioning-review.mdc`. Bàn giao cho Design bản phân tích sau xử lý review cùng phần rõ ràng và phần còn bị chặn. Không sửa findings hoặc đánh giá nhóm để khớp kết quả.
 
 ## 2. Đầu ra
 

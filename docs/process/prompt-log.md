@@ -260,6 +260,22 @@ make the commit baseline and store this moc
 - Kết quả thực tế: đã tạo baseline_commit `44c586c47105a9107af9673ff56604e83bd07ece`, tag `payment-management-design-baseline-v1` giải tham chiếu đúng SHA này; 27 đường dẫn thay đổi, PDF được Git nhận diện rename 100%. Đã kiểm phạm vi stage, đủ 8 tài liệu/6 PlantUML/6 PNG và 120 liên kết nội bộ có đích trong index; `git diff --cached --check` đạt.
 - Lưu hồ sơ mốc tại [payment-management-initial.md](baselines/payment-management-initial.md) bằng commit kế tiếp, cùng cập nhật liên kết README và mục nhật ký này. Mốc baseline là commit thiết kế nêu trên, không phải commit chứa hồ sơ mốc. Chưa có revised_commit hoặc review thực tế; không push.
 
+## PRM-010 - Chuyển Reviewer sang review đầu ra phân tích BA
+
+- Ngày theo phiên: 12/11/2026, Asia/Bangkok; không ghi giờ chưa xác minh.
+- Người yêu cầu: người dùng trong hội thoại. Công cụ thực hiện: Codex chỉnh sửa instructions; không thực hiện vai trò Reviewer trong lượt này.
+- Prompt nguyên văn:
+
+```text
+Now help me change something: The AI reviewer role should be reviewing the outputs from analysis phase, which is after the BA has done its tasks. Help me to change the instructions for the AI reviewer to review at analysis phase instead of the whole process(analysis + design)
+```
+
+- Đầu vào: AGENTS/README, ba rules, ba vai trò BA/Design/Reviewer, biểu mẫu và hướng dẫn vòng review; tham khảo nhật ký hiện có để giữ bằng chứng lịch sử.
+- Thay đổi: giới hạn Reviewer ở ba hồ sơ BA cùng PDF/xác nhận liên quan; đổi checklist sang nguồn, US/rule/NFR, AC, issues, decisions và khả năng bàn giao Design. Đồng bộ handoff BA/Design, rules truy vết/phiên bản, README và ba biểu mẫu review; ghi nguồn gốc thay đổi và điều chỉnh dàn ý trình bày.
+- Workflow mới: BA hoàn thành phân tích → baseline phân tích → Reviewer → nhóm đánh giá → BA sửa/đối chiếu → Design. Reviewer chỉ ghi findings và phần thực tế của review-record; không sửa phân tích hoặc đánh giá thay nhóm.
+- Phạm vi bảo toàn: không sửa BA/PDF/thiết kế, hồ sơ baseline, vòng R001 đã có hoặc nhật ký trước PRM-010. Không tạo review mới, chạy review, stage/commit/push hoặc thay lịch sử Git.
+- Kiểm tra: rà soát diff và các chỉ dẫn Reviewer/baseline/handoff trong file hiện hành; kiểm tra nội dung, bảng Markdown và khoảng trắng. Đây là kiểm tra instructions, không phải review phân tích hay kiểm thử ứng dụng.
+
 ## Mẫu cho lượt tiếp theo
 
 ### [PRM-xxx] - [Tên nhiệm vụ]
