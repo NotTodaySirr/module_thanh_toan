@@ -1,10 +1,12 @@
 # 06. Ma trận truy vết
 
 - Module: `payment-management`. Trạng thái: **Design Approved - Người dùng đã phê duyệt**.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok; Codex / System Design Agent.
-- Nguồn: [PDF](../../requirements/btcohong.pdf), [định nghĩa nguồn S và 30 AC của BA](../../analysis/payment-management/requirements-analysis.md), [PAY-DEC-001 đến PAY-DEC-014](../../analysis/payment-management/decisions.md).
-- Vòng review: chưa mở. Trạng thái mọi dòng: **đã mô tả thiết kế, chưa kiểm thử ứng dụng**; phụ thuộc triển khai không là vấn đề nghiệp vụ chưa xác nhận.
+- Nguồn: [PDF](../../requirements/btcohong.pdf), [định nghĩa nguồn S và 37 AC của BA](../../analysis/payment-management/requirements-analysis.md), [PAY-DEC-001 đến PAY-DEC-015](../../analysis/payment-management/decisions.md).
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. Quy ước và đường dẫn
 
@@ -17,9 +19,9 @@ UML: C = [class.puml](diagrams/class.puml); S = [state-machine.puml](diagrams/st
 | Mã; nguồn PDF | Component/class | UML | API | Data | Kiểm chứng; trạng thái/phụ thuộc |
 | --- | --- | --- | --- | --- | --- |
 | US-PAY-01; S04 trang 2 mục 4.1 | PaymentService, MoneyCalculator, SourceGateway | C/S/Q1 | A01-A05, A08, A13 | Document/Revision/Line/Snapshot/MonthClaim | T01-T03/T11-T14; DEP-01/02/04 |
-| US-PAY-02; S05 trang 2 mục 4.2 | PaymentService, ApprovalPolicy, NotificationDispatcher | C/S/Q2 | A06, A14, A18/A19 | Submission/Notification/Receipt | T04-T08/T12/T17; DEP-01/02/03 |
-| US-PAY-03; S06 trang 2 mục 4.3 | PaymentService, ApprovalPolicy, AssignmentDirectory | C/S/Q3 | A02, A07/A08/A12/A14/A15 | Submission/AssignmentHistory/Audit | T06/T07/T09/T10/T13/T19; DEP-01/02/03 |
-| US-PAY-04; S07 trang 2 mục 4.4 | PaymentChain, PaymentService, EvidenceStore | C/S/Q4 | A04-A08, A10/A11/A16/A17 | Chain/Document/Revision/Evidence | T03/T06/T07/T12/T13/T16/T18/T19; DEP-01/02/03 |
+| US-PAY-02; S05 trang 2 mục 4.2 | PaymentService, ApprovalPolicy, NotificationDispatcher | C/S/Q2 | A06, A14, A18/A19 | Submission/Notification/Receipt | T04-T08/T12/T17/T24/T25; DEP-01/02/03 |
+| US-PAY-03; S06 trang 2 mục 4.3 | PaymentService, ApprovalPolicy, AssignmentDirectory | C/S/Q3 | A02, A07/A08/A12/A14/A15 | Submission/AssignmentHistory/Audit | T06/T07/T09/T10/T13/T19/T26/T27; DEP-01/02/03 |
+| US-PAY-04; S07 trang 2 mục 4.4 | PaymentChain, PaymentService, EvidenceStore | C/S/Q4 | A04-A08, A10/A11/A16/A17 | Chain/Document/Revision/Evidence | T03/T06/T07/T12/T13/T16/T18/T19/T21/T22/T23; DEP-01/02/03 |
 | US-PAY-05; S08 trang 2 mục 4.5 | PaymentDocument, PaymentRepository | C/S/Q1 | A01/A08/A09/A13 | Document/MonthClaim/Audit | T14/T15; DEP-02/04 |
 | PAY-01; S09 trang 2 mục 5 | SourceGateway, PaymentRepository | C/Q1/Q2/Q4 | A01/A04/A05/A06/A09/A10 | Snapshot/MonthClaim/Chain | T01/T02/T12/T14/T15/T16; DEC-004/007/008/012 |
 | PAY-02; S09 trang 2 mục 5 | SourceGateway | C/Q1/Q2/Q3/Q4 | A01/A04/A05/A06/A07/A10 | Snapshot/Line | T01/T02/T12/T13; DEC-008/012 |
@@ -53,6 +55,8 @@ Từng AC giữ nguyên định danh và expected result đã chốt trong BA, k
 | AC-US-PAY-02-03 | SourceGateway/PaymentDocument | Q2 | A06 | Snapshot/Line | T04; DEP-01 |
 | AC-US-PAY-02-04 | PaymentDocument | Q2 | A06 | Revision/Line | T04/T05; DEP-01 |
 | AC-US-PAY-02-05 | PaymentService/Dispatcher/Repository | Q2 | A06/A14/A18/A19 | Receipt/Submission/Notification/Attempt | T08/T17; DEP-03/04 |
+| AC-US-PAY-02-06 | PaymentService/SourceGateway/PaymentRevision | Q2 | A06/A04/A05 | Snapshot/Revision; không TX-SUBMIT khi nguồn đổi | T24; DEP-01; F002/PAY-DEC-012 |
+| AC-US-PAY-02-07 | PaymentService/SourceGateway | Q2 | A06 | Document/Revision giữ nguyên khi nguồn lỗi | T25; DEP-01; F002/PAY-DEC-012 |
 | AC-US-PAY-03-01 | ApprovalPolicy/PaymentDocument | Q3 | A07 | Submission; TX-DECIDE | T06/T13; DEP-01/02 |
 | AC-US-PAY-03-02 | ApprovalPolicy/PaymentDocument | Q3 | A07 | Submission; TX-DECIDE | T06/T13; DEP-01/02 |
 | AC-US-PAY-03-03 | ApprovalPolicy | C/Q2/Q3 | A06/A07/A12 | Submission.requiredRole | T03/T06; DEP-02 |
@@ -61,9 +65,14 @@ Từng AC giữ nguyên định danh và expected result đã chốt trong BA, k
 | AC-US-PAY-03-06 | PaymentDocument/PaymentRevision | S/Q3 | A07/A08 | Submission/Revision/Audit; TX-DECIDE/STATE | T10/T18; DEP-04 |
 | AC-US-PAY-03-07 | AssignmentDirectory/Repository | Q3 | A07/A12/A14 | Submission/AssignmentHistory; TX-ASSIGN/DECIDE | T07/T09; DEP-02/04 |
 | AC-US-PAY-03-08 | PaymentWeb/PaymentChain, quy trình KTT ngoài module | Q4 | A02 cung cấp căn cứ; không API bàn giao | Chain.currentApproved/Revision/Evidence | T19; DEP-03 |
+| AC-US-PAY-03-09 | PaymentService/SourceGateway/PaymentRevision | Q3 | A07/A08 | Submission.revisionId/Snapshot giữ nguyên; reject chỉ khi có lệnh | T26; DEP-01/02; F002/PAY-DEC-012 |
+| AC-US-PAY-03-10 | PaymentService/SourceGateway | Q3 | A07 | Submission Open/Document PendingApproval, revision không đổi | T27; DEP-01; F002/PAY-DEC-012 |
 | AC-US-PAY-04-01 | PaymentChain/PaymentService/EvidenceStore | C/S/Q4 | A10/A11/A16/A17/A06/A07 | Chain/Document/Revision/Evidence; TX-ADJUST/DECIDE | T02/T07/T13/T16; DEP-01/02/03 |
 | AC-US-PAY-04-02 | PaymentService/EvidenceStore | Q2/Q4 | A10/A11/A16/A06 | Evidence/Revision | T16/T18; DEP-03 |
 | AC-US-PAY-04-03 | UnitOfWork/PaymentChain | Q4 | A05/A07/A10/A11/A15 | Revision.delta/Audit; TX-EDIT/ADJUST/DECIDE | T16/T18; DEP-04 |
+| AC-US-PAY-04-04 | PaymentChain.hasProcessingAdjustment/Repository/PaymentWeb | C/S/Q4 | A10/A02; bàn giao thủ công | Chain.activeAdjustmentId; TX-ADJUST | T21; DEP-02/03/04; F001/PAY-DEC-015 |
+| AC-US-PAY-04-05 | PaymentChain/PaymentDocument/Repository | C/S/Q3/Q4 | A08/A09/A10/A02 | Chain/MonthClaim/Revision/Audit; TX-STATE/CANCEL | T22; DEP-02/03/04; F001/PAY-DEC-015 |
+| AC-US-PAY-04-06 | PaymentChain/PaymentService/PaymentWeb | C/S/Q4 | A07/A10/A02 | Chain.currentApproved/activeAdjustmentId; TX-DECIDE/ADJUST | T23; DEP-02/03/04; F001/PAY-DEC-015 |
 | AC-US-PAY-05-01 | PaymentDocument/AssignmentDirectory | S | A09/A13 | Document/Audit; TX-CANCEL | T15; DEP-02/04 |
 | AC-US-PAY-05-02 | PaymentDocument | S | A03/A06/A08/A09 | Document.status, guard | T15; DEP-04 |
 | AC-US-PAY-05-03 | PaymentChain/PaymentRepository | S/Q1/Q4 | A01/A09 | MonthClaim/Chain/Document.replacementOf | T14/T15/T16; DEP-01/04 |
@@ -89,5 +98,16 @@ Từng AC giữ nguyên định danh và expected result đã chốt trong BA, k
 | PAY-ISS-012 → PAY-DEC-012 | Snapshot semantic hash/source recheck; A04/A05/A06/A07/A10; Q1-Q4 | T01/T12/T13/T16 |
 | PAY-ISS-013 → PAY-DEC-013 | A02 hiển thị chuỗi Approved/điều chỉnh; quy trình thủ công ngoài module | T19 |
 | PAY-ISS-014 → PAY-DEC-014 | Receipt/outbox/attempt/inbox; A06/A14/A18/A19; Q2; ADR-004/005 | T08/T17 |
+| PAY-DEC-015 bổ sung PAY-ISS-001/003/007/013; R002-F001 | Toàn chuỗi Draft/PendingApproval/Rejected; A02/A07/A08/A09/A10; C/S/Q4; ADR-006 | T21/T22/T23 |
 
-Không có PAY-ISS nào trong 14 vấn đề trên còn chờ chọn phương án nghiệp vụ. Mốc baseline được lưu theo PRM-009; chưa có review độc lập, dữ liệu nguồn thật hoặc kết quả test ứng dụng; vì vậy không gán trạng thái “đã nghiệm thu” cho các dòng truy vết.
+Không có PAY-ISS nào trong 14 vấn đề trên còn chờ chọn phương án nghiệp vụ. Mốc baseline được lưu theo PRM-009; R002 đã đối chiếu phạm vi BA, chưa có kiểm thử ứng dụng hoặc dữ liệu nguồn thật; vì vậy không gán trạng thái “đã nghiệm thu” cho các dòng truy vết.
+
+## 5. Mapping delta sau BA R002
+
+| Finding đã được người dùng đánh giá | Quyết định/AC | Điều chỉnh thiết kế | Kiểm chứng |
+| --- | --- | --- | --- |
+| payment-management-R002-F001 - Đúng có giới hạn | PAY-DEC-015; AC-US-PAY-04-04/05/06 | Bổ sung căn cứ cho guard đã có; làm rõ điều kiện toàn chuỗi, A02/cờ bàn giao, invariant con trỏ, state/sequence và ADR-006 | T21/T22/T23; không kết luận baseline từng chắc chắn kẹt hoặc tạo trùng |
+| payment-management-R002-F002 - Đúng | PAY-DEC-012; AC-US-PAY-02-06/07, AC-US-PAY-03-09/10 | Giữ chính sách nguồn/snapshot/API/error cũ; thêm mapping, ví dụ giữ tiền/nội dung và kiểm chứng từng nhánh | T24/T25/T26/T27; chưa kiểm thử ứng dụng |
+| payment-management-R002-F003 - Thừa | Không có quyết định hoặc AC mới | Không phát sinh yêu cầu kỹ thuật; nhãn nguồn của BA được xem là tóm lược | Đối chiếu nguồn, không mở công việc riêng |
+
+14 mã vấn đề vẫn được giữ; có 15 PAY-DEC và 37 AC. BA revised_commit và hồ sơ R002 tham chiếu ở tài liệu 08; mốc thiết kế ban đầu không bị sửa. Đây là cập nhật Design theo review phân tích, không ghi kết quả xử lý thay vào findings/đánh giá nhóm của R002.

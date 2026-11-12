@@ -1,6 +1,6 @@
 @startuml
 title Payment-management - điều chỉnh liên kết, giữ nguyên Approved
-caption US-PAY-04; PAY-03..08; NFR-PAY-01; PAY-DEC-001/002/003/007/008/009/011/012/013. TO-BE đề xuất kỹ thuật.
+caption US-PAY-04; PAY-03..08; NFR-PAY-01; PAY-DEC-001/002/003/007/008/009/011/012/013. TO-BE đề xuất kỹ thuật.\nCập nhật 12/11/2026 theo BA R002 / PRM-012; Design Approved (PRM-013).
 skinparam defaultFontName Arial
 autonumber
 actor "KTT phụ trách" as KTT
@@ -31,7 +31,7 @@ end note
 Service -> Calc : calculate(bundle) - toàn bộ dòng/tổng mới
 Calc --> Service : exactTotal, officialTotal, lines
 group TX-ADJUST
-  Service -> Repo : khóa chain, kiểm base=currentApproved, chưa có activeAdjustment
+  Service -> Repo : khóa chain, kiểm base=currentApproved, hasProcessingAdjustment()=false toàn chuỗi
   alt base cũ hoặc có Draft/PendingApproval/Rejected điều chỉnh
     Repo --> Service : STALE_BASE / ADJUSTMENT_IN_PROGRESS; rollback
   else hợp lệ
@@ -65,10 +65,26 @@ opt Draft điều chỉnh hợp lệ
   Service --> Api : kết quả quyết định
   Api --> Reviewer : 200; Approved: 480 -> 510, delta +30, không 990\nRejected: KTT reopen trước sửa/trình/hủy
 end
+opt Điều chỉnh đã Rejected, KTT muốn bỏ hồ sơ
+  KTT -> Api : A08 POST /{adjustmentId}/reopenings, If-Match, key
+  Api -> Service : reopen(adjustmentId)
+  Service -> Repo : TX-STATE: Rejected -> Draft, revision mới/audit\nGIỮ activeAdjustmentId và cờ dừng bàn giao
+  Repo --> Service : Draft / version mới
+  Service --> Api : Draft vẫn giữ vị trí
+  Api --> KTT : 200; hủy ở lệnh sau
+  KTT -> Api : A09 POST /{adjustmentId}/cancellations\nreason, If-Match, key
+  Api -> Service : cancel(adjustmentId, reason)
+  Service -> Repo : TX-CANCEL: Cancelled + audit; clear đúng vị trí\nGIỮ currentApproved và claim tháng gốc
+  Repo --> Service : kết quả / snapshot chain
+  Service --> Api : Cancelled; không phục hồi bản này
+  Api --> KTT : 200; tạo mã mới/bàn giao chỉ khi toàn chuỗi không còn xử lý
+end
 note over KTT,Repo
-  Hủy Draft điều chỉnh: clear slot, không giải phóng tháng gốc.
+  PAY-DEC-015 / AC-US-PAY-04-04/05/06:
+  Hủy Draft điều chỉnh chỉ clear vị trí chính hồ sơ, không giải phóng tháng gốc.
   Bàn giao kế toán thủ công sau Approved, đối chiếu cùng chuỗi.
-  Có điều chỉnh đang xử lý thì tạm dừng bàn giao mới;
+  Draft/PendingApproval/Rejected giữ vị trí, tạm dừng bàn giao mới.
+  A Approved/Cancelled nhưng B đang xử lý: vẫn chặn tạo C/bàn giao;
   chỉ bàn giao tổng hiện hành và delta, không cộng các bản đầy đủ.
 end note
 @enduml

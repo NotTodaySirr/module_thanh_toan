@@ -1,17 +1,19 @@
 # 01. Tóm tắt yêu cầu thiết kế
 
 - Module: `payment-management`.
-- Trạng thái: **Design Approved - Người dùng đã phê duyệt** - thiết kế lần đầu; chưa review độc lập.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Trạng thái: **Design Approved - Người dùng đã phê duyệt** - bản cập nhật theo BA sau R002.
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok. Người soạn: Codex, vai trò System Design Agent.
-- Nguồn: [PDF gốc](../../requirements/btcohong.pdf), [phân tích BA](../../analysis/payment-management/requirements-analysis.md), [14 quyết định đã xác nhận](../../analysis/payment-management/decisions.md), PRM-006.
-- Vòng review: chưa mở; phải lưu baseline Git chứa thiết kế thật trước review.
+- Nguồn: [PDF gốc](../../requirements/btcohong.pdf), [phân tích BA](../../analysis/payment-management/requirements-analysis.md), [15 quyết định đã xác nhận](../../analysis/payment-management/decisions.md), PRM-006 và bổ sung R002/PRM-011.
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. Phạm vi và cách hiểu căn cứ
 
 Module lập bảng, sửa Draft trong phạm vi cho phép, trình, duyệt/từ chối, mở lại, hủy và lập hồ sơ điều chỉnh. Hợp đồng, bảng giá, sản lượng là nguồn chỉ đọc. Hóa đơn, công nợ, đối soát nguồn, ký điện tử và tự động bàn giao kế toán nằm ngoài phạm vi (PDF trang 1 mục 1; PAY-DEC-013).
 
-Nguồn S01-S11 giữ nguyên định nghĩa trong phân tích BA: S01-S03 ở trang 1; S04-S09 ở trang 2; S10-S11 ở trang 3. US/PAY là mã PDF; AC/NFR/S là mã BA. Endpoint, kiểu dữ liệu, lớp, bảng, khóa và cơ chế giao dịch trong bộ này đều là **Đề xuất kỹ thuật**, không phải phát biểu nguyên gốc PDF. Các PAY-DEC là **Đã xác nhận** theo PRM-006; không yêu cầu xác nhận lại.
+Nguồn S01-S11 giữ nguyên định nghĩa trong phân tích BA: S01-S03 ở trang 1; S04-S09 ở trang 2; S10-S11 ở trang 3. US/PAY là mã PDF; AC/NFR/S là mã BA. Endpoint, kiểu dữ liệu, lớp, bảng, khóa và cơ chế giao dịch trong bộ này đều là **Đề xuất kỹ thuật**, không phải phát biểu nguyên gốc PDF. PAY-DEC-001..014 được xác nhận tại PRM-006; PAY-DEC-015 được xác nhận bổ sung qua R002-F001/PRM-011. Không yêu cầu xác nhận lại; tổng hiện hành 37 AC.
 
 ## 2. Tác nhân
 
@@ -31,9 +33,9 @@ PAY-07/PAY-DEC-011 yêu cầu đồng thời kiểm tra vai trò, đơn vị, ph
 | US; nguồn | Hành vi đã chốt | AC BA |
 | --- | --- | --- |
 | US-PAY-01; S04, trang 2 mục 4.1 | Lập Draft từ nguồn hợp lệ, tách dòng theo giá, tính tiền; sửa ghi chú hoặc chủ động cập nhật toàn bộ căn cứ | AC-US-PAY-01-01 đến AC-US-PAY-01-08 |
-| US-PAY-02; S05, trang 2 mục 4.2 | Kiểm tra lại nguồn, tổng/dịch vụ/người duyệt; cố định lần trình, chuyển PendingApproval; chống trùng và theo dõi thông báo riêng | AC-US-PAY-02-01 đến AC-US-PAY-02-05 |
-| US-PAY-03; S06, trang 2 mục 4.3 | Một cấp duyệt theo ngưỡng; kiểm tra nguồn trước duyệt; từ chối có lý do vào Rejected; mở lại Draft là thao tác riêng | AC-US-PAY-03-01 đến AC-US-PAY-03-08 |
-| US-PAY-04; S07, trang 2 mục 4.4 | KTT lập hồ sơ điều chỉnh đầy đủ dòng/tổng, biên bản, duyệt riêng; giữ nguyên Approved cũ | AC-US-PAY-04-01 đến AC-US-PAY-04-03 |
+| US-PAY-02; S05, trang 2 mục 4.2 | Kiểm tra lại nguồn, tổng/dịch vụ/người duyệt; cố định lần trình, chuyển PendingApproval; chống trùng và theo dõi thông báo riêng | AC-US-PAY-02-01 đến AC-US-PAY-02-07 |
+| US-PAY-03; S06, trang 2 mục 4.3 | Một cấp duyệt theo ngưỡng; kiểm tra nguồn trước duyệt; từ chối có lý do vào Rejected; mở lại Draft là thao tác riêng | AC-US-PAY-03-01 đến AC-US-PAY-03-10 |
+| US-PAY-04; S07, trang 2 mục 4.4 | KTT lập hồ sơ điều chỉnh đầy đủ dòng/tổng, biên bản, duyệt riêng; giữ nguyên Approved cũ | AC-US-PAY-04-01 đến AC-US-PAY-04-06 |
 | US-PAY-05; S08, trang 2 mục 4.5 | Phụ trách hủy Draft có lý do; Cancelled không phục hồi; lập thay thế mã mới và kiểm tra nguồn/kỳ lại | AC-US-PAY-05-01 đến AC-US-PAY-05-03 |
 
 | Rule; PDF trang 2 mục 5 (S09) | Áp dụng với xác nhận nghiệp vụ |
@@ -60,6 +62,12 @@ Mâu thuẫn PDF giữ trong BA, áp dụng quyết định đã chốt: US-PAY-
 
 ## 5. Quyết định, phụ thuộc và trạng thái
 
-PAY-DEC-001 đến PAY-DEC-014 đều đã xác nhận. Thiết kế áp dụng thêm các nội dung: dịch vụ bắt buộc từ hợp đồng (005); sửa ghi chú và audit Draft (006); hủy/lập lại (007); giá theo ngày (008); VND/làm tròn (009); phép đo (010); phân công độc lập (011); kiểm tra nguồn (012); bàn giao thủ công (013); thử gửi lại (014). Toàn văn có hiệu lực tại sổ xác nhận, không chỉ bảng tóm tắt này.
+PAY-DEC-001 đến PAY-DEC-015 đều đã xác nhận; PAY-DEC-015 bổ sung tập trạng thái giữ vị trí điều chỉnh và điều kiện bàn giao toàn chuỗi sau R002, không thay thế 14 quyết định cũ. Thiết kế áp dụng thêm các nội dung: dịch vụ bắt buộc từ hợp đồng (005); sửa ghi chú và audit Draft (006); hủy/lập lại (007); giá theo ngày (008); VND/làm tròn (009); phép đo (010); phân công độc lập (011); kiểm tra nguồn (012); bàn giao thủ công (013); thử gửi lại (014). Toàn văn có hiệu lực tại sổ xác nhận, không chỉ bảng tóm tắt này.
 
-Không còn lựa chọn nghiệp vụ nào trong 14 vấn đề cần hỏi lại. Các phụ thuộc triển khai được theo dõi riêng ở [bàn giao](08-handoff-to-developer.md): hợp đồng dữ liệu nguồn nhất quán, danh sách người dùng/quyền, kho biên bản và môi trường đo. Thiếu đầu vào thì chặn/chờ đúng nghiệp vụ; không nới quy tắc. Các quyết định kỹ thuật trong [ADR](07-design-decisions.md) được người dùng phê duyệt cùng bộ thiết kế tại PRM-008.
+Không còn lựa chọn nghiệp vụ nào trong 14 vấn đề cần hỏi lại. Các phụ thuộc triển khai được theo dõi riêng ở [bàn giao](08-handoff-to-developer.md): hợp đồng dữ liệu nguồn nhất quán, danh sách người dùng/quyền, kho biên bản và môi trường đo. Thiếu đầu vào thì chặn/chờ đúng nghiệp vụ; không nới quy tắc. Các lựa chọn kỹ thuật ban đầu trong [ADR](07-design-decisions.md) được phê duyệt tại PRM-008; bản cập nhật hiện hành được ghi nhận riêng, đã được người dùng phê duyệt tại PRM-013.
+
+### 5.1 Phần bổ sung cần áp dụng sau R002
+
+- PAY-DEC-015: Draft/PendingApproval/Rejected giữ vị trí điều chỉnh duy nhất và dừng bàn giao mới. Approved/Cancelled chỉ kết thúc việc giữ vị trí của chính hồ sơ đó; quyền tạo tiếp/bàn giao còn phụ thuộc toàn chuỗi và căn cứ hiện hành.
+- AC-US-PAY-04-04/05/06 kiểm ba trạng thái giữ vị trí, Rejected → Draft → Cancelled và duyệt/tạo tiếp. Bốn AC-US-PAY-02-06/07, AC-US-PAY-03-09/10 bổ sung kiểm chứng chính sách nguồn đã có ở PAY-DEC-012; không thêm nghiệp vụ hoặc endpoint.
+- F003 được người dùng đánh giá Thừa: không tạo yêu cầu mới. Nguồn PDF vẫn được dẫn theo trang/mục; diễn giải kỹ thuật không được gọi là trích nguyên văn.

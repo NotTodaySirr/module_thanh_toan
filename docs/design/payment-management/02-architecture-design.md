@@ -1,14 +1,16 @@
 # 02. Thiết kế kiến trúc
 
 - Module: `payment-management`. Trạng thái: **Design Approved - Người dùng đã phê duyệt**.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok; Codex / System Design Agent.
-- Nguồn: [PDF](../../requirements/btcohong.pdf) trang 1 mục 1-3, trang 2 mục 4-5, trang 3 mục 6; [BA](../../analysis/payment-management/requirements-analysis.md); [PAY-DEC-001 đến PAY-DEC-014](../../analysis/payment-management/decisions.md).
-- Vòng review: chưa mở; đây là TO-BE đề xuất, chưa có bằng chứng triển khai.
+- Nguồn: [PDF](../../requirements/btcohong.pdf) trang 1 mục 1-3, trang 2 mục 4-5, trang 3 mục 6; [BA](../../analysis/payment-management/requirements-analysis.md); [PAY-DEC-001 đến PAY-DEC-015](../../analysis/payment-management/decisions.md).
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. AS-IS có bằng chứng
 
-Khảo sát ngày 07/11/2026 bằng `rg --files --hidden` và đọc các đường dẫn bên dưới trong repository module:
+Khảo sát AS-IS ban đầu ngày 07/11/2026 bằng `rg --files --hidden` và đọc các đường dẫn bên dưới trong repository module:
 
 | Đã kiểm tra | Kết quả |
 | --- | --- |
@@ -30,7 +32,7 @@ Khảo sát ngày 07/11/2026 bằng `rg --files --hidden` và đọc các đư�
 | PaymentWeb | Hiển thị Draft/nguồn khác biệt/danh sách chờ; không tính tổng độc lập; giữ Idempotency-Key cho retry cùng ý định | PaymentApi |
 | PaymentApi | Xác thực, ràng buộc dữ liệu, ETag, ánh xạ lỗi; không nhận userId/vai trò từ body | PaymentService, ActorContext |
 | PaymentService | Điều phối lập/sửa/cập nhật/trình/duyệt/hủy/điều chỉnh/phân công | Domain, SourceGateway, AssignmentDirectory, UnitOfWork |
-| PaymentDocument, PaymentChain | Guard trạng thái, bất biến Approved, lần trình, chuỗi điều chỉnh | MoneyCalculator, ApprovalPolicy |
+| PaymentDocument, PaymentChain | Guard trạng thái, bất biến Approved, lần trình, chuỗi điều chỉnh và `hasProcessingAdjustment()` xét toàn chuỗi | MoneyCalculator, ApprovalPolicy |
 | SourceGateway | Tập hợp nguồn hợp đồng/giá/sản lượng chỉ đọc, kiểm tra nhất quán và so sánh căn cứ | Các adapter theo hợp đồng giao tiếp thực tế |
 | AssignmentDirectory | Trả người phụ trách, quyền xem, người duyệt chính/thay thế/căn cứ ủy quyền có phiên bản | Nguồn phân quyền do đơn vị cung cấp |
 | PaymentRepository, UnitOfWork | Dữ liệu bảng/dòng/căn cứ/chuỗi, khóa, kiểm tra version, audit và outbox trong một transaction | DB quan hệ giao dịch |
@@ -85,10 +87,20 @@ Lỗi nguồn/thiếu phân công không tạo PendingApproval. Nguồn đổi t
 
 Trước mỗi lần gửi kiểm tra document còn PendingApproval, submission hiện hành và assignmentVersion/recipient còn khớp. Thay người tạo thông báo cho người mới cùng submission, dừng việc gửi cũ. Việc gửi đang trên đường truyền không thể thu hồi; link luôn kiểm quyền/assignment hiện hành, có cùng mã submission để người nhận nhận biết trùng. Khi đã xử lý, không tiếp tục lên lịch thông báo cũ. Inbox lấy từ submission DB, không phụ thuộc kênh ngoài. Vận hành xem mục NeedsAttention và yêu cầu một lượt Manual cùng tham chiếu; lượt này không chịu cửa sổ tự động đã hết và không reset số lần tự động, lỗi tiếp thì về NeedsAttention. Mỗi lần gửi có lịch sử.
 
-PAY-DEC-013: màn hình đọc hồ sơ có thông tin để KTT đối chiếu; không thêm API bàn giao/xuất file hoặc trạng thái hóa đơn. Hiển thị bản Approved hiện hành, tổng cũ/mới/chênh lệch/biên bản, cảnh báo hồ sơ điều chỉnh đang xử lý để tạm dừng bàn giao mới. Bằng chứng gửi/nhận lưu ngoài module theo quy trình đơn vị; Approved không chứng minh đã bàn giao.
+PAY-DEC-013/015: màn hình đọc hồ sơ có thông tin để KTT đối chiếu; không thêm API bàn giao/xuất file hoặc trạng thái hóa đơn. Hiển thị bản Approved hiện hành, tổng cũ/mới/chênh lệch/biên bản, cảnh báo hồ sơ điều chỉnh đang xử lý để tạm dừng bàn giao mới. Bằng chứng gửi/nhận lưu ngoài module theo quy trình đơn vị; Approved không chứng minh đã bàn giao.
 
 ## 7. Hiệu năng và giới hạn
 
 Đọc nguồn theo lô theo hợp đồng/kỳ, lấy giá sau khi biết bảng hợp đồng chỉ định; không gọi mỗi dòng một lần. Index kỳ, người nhận/trạng thái, audit theo bảng. Tính chính xác trong bộ nhớ rồi ghi theo lô một transaction; không gọi mạng dưới khóa DB. Cache chỉ được dùng nếu xác minh version/hiệu lực; không dùng cache cũ vượt qua kiểm tra nguồn trước trình/duyệt.
 
 Đo đầu-cuối theo PAY-DEC-010, ghi thời gian đọc nguồn/tính/lưu/hiển thị để tìm nút thắt; tiêu chí vẫn là tổng từng lượt ≤3 giây trong tập dưới 200 dòng. Không khẳng định kiến trúc tự đáp ứng NFR khi chưa có môi trường và phép đo thật. Chi tiết kịch bản ở [bàn giao](08-handoff-to-developer.md).
+
+## 8. Đối chiếu kiến trúc sau BA R002
+
+Khảo sát lại ngày 12/11/2026: module đã có bộ thiết kế baseline và BA sửa, vẫn chưa có mã ứng dụng/API/DB/tests. Các dòng AS-IS về README thiết kế trống và chưa có vòng review ở mục 1 là ảnh chụp khảo sát ban đầu, không mô tả hiện tại. R002 hiện đã đối chiếu **phân tích BA**, không là review kiến trúc này.
+
+PAY-DEC-015 xác nhận cơ chế đã được đề xuất ở ADR-006: `PaymentChain.hasProcessingAdjustment()` xét mọi Adjustment thuộc chain có status trong {Draft, PendingApproval, Rejected}. `activeAdjustmentId` phải khớp đúng kết quả này; không kiểm riêng trạng thái bản đang được xem. Tạo điều chỉnh kiểm guard dưới khóa chain, chặn nếu có hồ sơ đang xử lý; approve/cancel chỉ kết thúc vị trí của chính hồ sơ được quyết định, không xóa dấu giữ vị trí của hồ sơ khác.
+
+API đọc A02 trả `activeAdjustmentId`, `currentApprovedDocumentId`, `handoffBlockedByAdjustment` từ cùng snapshot đọc của chain, kể cả khi mở Original hoặc Adjustment Approved/Cancelled cũ. Nếu có hồ sơ mới đang xử lý thì cờ vẫn true. Cờ là thông tin phục vụ quy trình thủ công, không chứng nhận đã bàn giao hoặc giữ chỗ cho thao tác ngoài module; KTT phải đối chiếu trạng thái hiện hành trước gửi. Không bổ sung endpoint bàn giao hoặc trạng thái mới.
+
+Bốn AC ngoại lệ nguồn sau R002 dùng nguyên SourceGateway/snapshot/preview/accept và các lỗi hiện có; yêu cầu bổ sung là truy vết và kiểm chứng rõ việc giữ tiền/căn cứ khi lệnh bị chặn. Không cần thay kiến trúc phân lớp, kênh tích hợp hoặc schema cho bảy AC mới.

@@ -1,6 +1,6 @@
 @startuml
 title Payment-management - lập Draft và cập nhật căn cứ có chấp nhận
-caption US-PAY-01/05; PAY-01..04; NFR-PAY-01/02; PAY-DEC-004..012. TO-BE đề xuất kỹ thuật.
+caption US-PAY-01/05; PAY-01..04; NFR-PAY-01/02; PAY-DEC-004..012. TO-BE đề xuất kỹ thuật.\nCập nhật 12/11/2026 theo BA R002 / PRM-012; Design Approved (PRM-013).
 skinparam defaultFontName Arial
 autonumber
 actor "NVKD phụ trách" as User

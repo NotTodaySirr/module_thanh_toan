@@ -305,6 +305,50 @@ ok proceed on your tasks
 - Hồ sơ sau commit BA: cập nhật [changes R002](../reviews/payment-management/R002/changes.md) mapping đủ 17 nhận xét, review-record mục 5 và trường revised_commit, nhật ký này cùng hai dòng đóng góp thực tế trong task-allocation. Lưu commit hồ sơ R002/process riêng sau commit BA; đưa findings/team-evaluation có sẵn vào Git nguyên nội dung, không đưa R001 vào commit. Không sửa baseline, reset/rebase/amend hoặc push.
 - Kết quả bàn giao: R002 **Đã đối chiếu ở phạm vi BA**, không còn lựa chọn F001/F002 chờ xác nhận. Design nhận bản phân tích sửa và hồ sơ review để cập nhật bộ thiết kế theo requirements-analysis mục 9.4; phụ thuộc dữ liệu/nhân sự/quy trình/môi trường vẫn phải chuẩn bị. Chưa sửa Design/UML/API/schema, viết/chạy ứng dụng, đo hiệu năng, gửi thông báo hoặc bàn giao kế toán thực tế. Không coi lượt BA là review độc lập mới hoặc phê duyệt thiết kế.
 
+## PRM-012 - Design tiếp nhận BA cập nhật sau R002
+
+- Ngày theo phiên: 12/11/2026, Asia/Bangkok; không ghi giờ chưa xác minh. Module/vai trò: `payment-management`, Codex / System Design Agent; không thực hiện vai trò Reviewer hoặc BA trong lượt này.
+- Người yêu cầu: người dùng trong hội thoại, chưa cung cấp tên cá nhân.
+- Prompt nguyên văn:
+
+```text
+ok the BA has updated the new documents. Read the new docs, and check if you need to modify or add anything
+```
+
+- Phạm vi thực hiện: đọc BA mới, diff với baseline thiết kế và đối chiếu tác động; cập nhật thiết kế/tài liệu bàn giao cần thiết theo xác nhận đã có, không sửa BA/PDF/review hoặc thêm nghiệp vụ. Không có yêu cầu lưu commit mới trong lượt này.
+- Đầu vào: AGENTS/README, ba rules và design.md hiện hành; ba hồ sơ BA văn bản khớp revised_commit `fb1160f459da7c65e475651af3bba1dc6a0de477`; đủ review-record/findings/team-evaluation/changes R002, đặc biệt findings mục 4 và review-record mục 5/changes về trạng thái Đã đối chiếu. Không sửa các đoạn lịch sử chờ BA trong findings/team-evaluation. PDF có hash không đổi so baseline; đã đọc nguồn ở lượt thiết kế đầu, không thay bằng template bên cạnh.
+- Git đầu lượt: HEAD `431f2ed` lưu bằng chứng R002; index trống, R001 chưa track có sẵn. Baseline/tag thiết kế đầu vẫn `44c586c47105a9107af9673ff56604e83bd07ece` / `payment-management-design-baseline-v1`. Snapshot hash 26 file đầu vào ngoài phạm vi Design/process trước sửa để kiểm bảo toàn.
+- Phát hiện: BA bổ sung PAY-DEC-015 (không tạo PAY-ISS mới) và 7 AC thành 37; giữ 5 US/8 PAY rule/2 NFR. Cơ chế giữ vị trí Draft/PendingApproval/Rejected, clear sau approve/cancel và chính sách nguồn đã có trong thiết kế đầu; chưa đủ căn cứ kết luận baseline chắc chắn kẹt/tạo trùng. Thiếu chủ yếu là căn cứ mới, mapping 7 AC và diễn giải guard bàn giao toàn chuỗi trên hồ sơ lịch sử.
+- Phần AI cập nhật: 8 tài liệu + README, 6 PlantUML và PNG; thêm mapping 7 AC, T21-T27, bảng năm trạng thái/điều kiện toàn chuỗi và invariant con trỏ; response A02 thêm activeAdjustmentId, làm rõ handoffBlockedByAdjustment từ cùng snapshot chain. Bốn AC nguồn giữ nguyên PAY-DEC-012, A06/A07 và lỗi hiện có, bổ sung kiểm chứng giữ Draft/100 triệu hoặc PendingApproval/nội dung lần trình. Không thêm endpoint, entity, trạng thái, module hoặc ADR; không thêm API bàn giao kế toán.
+- Căn cứ xác nhận: PAY-DEC-015/finding F001 đã được người dùng xác nhận qua R002/PRM-011; F002 chỉ bổ sung AC theo PAY-DEC-012 cũ; F003 Thừa, không phát sinh yêu cầu mới. Không hỏi lại hoặc coi findings tự tạo nghiệp vụ.
+- Trạng thái: bản cập nhật Design Pending Approval, phê duyệt PRM-008 giữ cho baseline lịch sử. Không gán lại phê duyệt cũ cho bản sửa; workflow hiện hành chỉ Reviewer review BA. Đã cập nhật hai dòng đóng góp Design/UML, giữ nguyên phần BA/đánh giá của người dùng.
+- UML: dùng Java/Graphviz và PlantUML 1.2025.10 cục bộ đã có, không gửi dịch vụ render ngoài. Lần check/render đầu báo lỗi ở sequence-adjustment do nhãn message xuống dòng thật thay vì escape; đã sửa, chạy lại checkonly/render exit 0 và mở đủ sáu PNG kiểm tra. Một lệnh in dòng tiếng Việt gặp stdout cp1252, đã dùng stdout UTF-8 rồi đọc lại; lỗi chỉ ở in kết quả, không thay nội dung nguồn.
+- Giới hạn: chưa chạy ứng dụng/DB/test nghiệp vụ hoặc đo hiệu năng; các T là kế hoạch kiểm chứng. Không sửa BA, PDF, R001/R002, instructions, hồ sơ baseline, tag hoặc lịch sử Git; không stage/commit/push.
+
+### Kiểm tra hồ sơ đã thực hiện trong PRM-012
+
+- Chạy Python trực tiếp: **103/103 kiểm tra tài liệu đạt**; 37 AC ánh xạ một-một với BA, giữ nguyên 30 dòng mapping cũ và 20 dòng test cũ, bổ sung riêng bảy AC và T21-T27; đủ 5 US/8 PAY rule/2 NFR/15 PAY-DEC/19 API/8 ADR/5 DEP.
+- **95 liên kết nội bộ** có đích file, **29 ví dụ JSON** parse được; bảng Markdown nhất quán số cột, không ký tự thay thế Unicode/khoảng trắng cuối dòng; tất cả mã AC đầy đủ tham chiếu có trong BA. Đã sửa nốt nhãn số AC trong phần kiểm tra API thành 37 khi đọc diff cuối.
+- Sáu nguồn UML checkonly/render exit 0 sau sửa; sáu PNG mở được và cập nhật sau nguồn, đã mở kiểm tra ảnh đủ sáu. Giữ năm trạng thái, Approved không là final tuyệt đối, sơ đồ lớp có hasProcessingAdjustment và nguồn PAY-DEC-015; sequence thể hiện giữ tiền/căn cứ ở bốn nhánh F002.
+- Hash **26 file đầu vào được bảo vệ** giữ nguyên, gồm BA/PDF/R001/R002/instructions/hồ sơ baseline. Ba BA khớp revised_commit sau chuẩn hóa xuống dòng; PDF SHA-256 giữ `8514A086A403AC4B1B57EEE4993894230677525FC66D19F7CDA9C827D057E436`; tag vẫn trỏ baseline thiết kế cũ. Index trống, không stage/commit.
+- `git diff --check` không có lỗi khoảng trắng; diff/status giới hạn 8 tài liệu + README, 6 PlantUML/6 PNG và hai hồ sơ process. R001 chưa track có sẵn được giữ nguyên. Tự kiểm tra tài liệu không là kiểm thử ứng dụng/DB/NFR hoặc phê duyệt thiết kế.
+- Một lần soạn lệnh điều phối QA gặp SyntaxError trước khi chạy do dấu backtick trong regex; đã sửa cách biểu diễn và chạy đủ 103 mục thành công, không thay đổi file từ lần lỗi.
+
+## PRM-013 - Phê duyệt thiết kế cập nhật sau BA R002
+
+- Ngày theo phiên: 12/11/2026, Asia/Bangkok; chưa ghi nhận giờ chính xác. Vai trò ghi nhận: Codex / System Design Agent.
+- Người phê duyệt: người dùng trong hội thoại, chưa cung cấp tên cá nhân. Không gán phê duyệt này cho KTT/GĐKD hoặc thành viên khác.
+- Prompt nguyên văn:
+
+```text
+that is fine, change the status to approve
+```
+
+- Căn cứ/phạm vi: người dùng đã nhận báo cáo tóm tắt và chấp thuận bộ thiết kế cập nhật PRM-012 sau BA R002, gồm PAY-DEC-015/guard toàn chuỗi, bốn nhánh lỗi nguồn, response A02, 37 AC và 27 nhóm kịch bản. Đây là xác nhận thiết kế mới, tách khỏi phê duyệt baseline tại PRM-008; không đổi 15 quyết định nghiệp vụ.
+- Thao tác: đổi trạng thái 8 tài liệu + README sang Design Approved; thêm người/ngày/prompt/căn cứ PRM-013; đồng bộ lời dẫn ADR/bàn giao, caption sáu PlantUML/PNG và hai dòng trạng thái đóng góp Design/UML. Giữ nguyên nội dung kỹ thuật/API/schema/guard/test dự kiến và lịch sử PRM-012.
+- Kiểm tra thực tế: 9/9 tài liệu có trạng thái và căn cứ phê duyệt PRM-013; liên kết nội bộ hợp lệ; sáu nguồn UML checkonly/render exit 0, PNG mở được và mới hơn nguồn; nhật ký PRM-013 duy nhất, tag baseline ban đầu giữ nguyên. `git diff --check` không báo lỗi. Phê duyệt thiết kế không là kết quả kiểm thử ứng dụng/NFR hoặc review phân tích mới.
+- Giới hạn: không sửa BA/PDF/R001/R002, instructions, hồ sơ baseline hoặc tag; không stage/commit/push và không triển khai ứng dụng trong lượt ghi nhận này.
+
 ## Mẫu cho lượt tiếp theo
 
 ### [PRM-xxx] - [Tên nhiệm vụ]

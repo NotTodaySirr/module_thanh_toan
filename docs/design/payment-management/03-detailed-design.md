@@ -1,16 +1,18 @@
 # 03. Thiết kế chi tiết
 
 - Module: `payment-management`. Trạng thái: **Design Approved - Người dùng đã phê duyệt**.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok; Codex / System Design Agent.
-- Nguồn: [PDF](../../requirements/btcohong.pdf) trang 1 mục 3, trang 2 mục 4-5, trang 3 mục 6; [BA và AC](../../analysis/payment-management/requirements-analysis.md); [PAY-DEC-001 đến PAY-DEC-014](../../analysis/payment-management/decisions.md).
-- Vòng review: chưa mở. Lớp/interface/thuật toán dưới đây là đề xuất thiết kế, chưa có code thực thi.
+- Nguồn: [PDF](../../requirements/btcohong.pdf) trang 1 mục 3, trang 2 mục 4-5, trang 3 mục 6; [BA và AC](../../analysis/payment-management/requirements-analysis.md); [PAY-DEC-001 đến PAY-DEC-015](../../analysis/payment-management/decisions.md).
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. Mô hình trách nhiệm và interface
 
 | Class/interface | Thuộc tính/chữ ký chính | Trách nhiệm |
 | --- | --- | --- |
-| PaymentChain | id, rootDocumentId, currentApprovedDocumentId?, activeAdjustmentId?, version | Một chuỗi bảng gốc và điều chỉnh; giữ con trỏ hiệu lực, serialize thay đổi chuỗi |
+| PaymentChain | id, rootDocumentId, currentApprovedDocumentId?, activeAdjustmentId?, version | Một chuỗi bảng gốc và điều chỉnh; `hasProcessingAdjustment(): Boolean` xét Draft/PendingApproval/Rejected toàn chuỗi, giữ con trỏ hiệu lực và serialize thay đổi |
 | PaymentDocument | id, kind Original/Adjustment, chainId, baseApprovedDocumentId?, status, originalCreatorId, createdBy, responsibleId, currentRevisionId, currentSubmissionId?, version | `submit`, `approve`, `reject`, `reopen`, `cancel`; guard vòng đời và bất biến Approved |
 | PaymentRevision | id, documentId, revisionNo, sourceSnapshotId, note, exactTotal, officialTotal, adjustmentReason?, evidenceId? | Nội dung bất biến sau lưu; mọi sửa Draft tạo revision mới, submission tham chiếu đúng revision |
 | PaymentLine | lineKey, serviceId, sourceQuantityId, priceId, serviceFrom/To, quantity, unitPrice, exactAmount, amount, note | Một đoạn sản lượng có cùng hiệu lực giá; không tồn tại độc lập revision |
@@ -61,7 +63,7 @@ Ký hiệu phụ trách: NVKD của bảng gốc hoặc KTT của điều chỉn
 | PendingApproval | retry thông báo / worker/vận hành | Còn cùng submission/assignment; đúng giới hạn với tự động | Giữ chờ, thêm attempt | Lịch sử gửi; không có audit chuyển trạng thái | US-PAY-02; DEC-014 |
 | Cancelled | sửa/trình/phục hồi | Luôn cấm | Không đổi | INVALID_STATE | US-PAY-05; DEC-007 |
 
-`DEC-xxx` trong bảng là viết tắt của `PAY-DEC-xxx` trong sổ xác nhận. Approved không có đường sửa/hủy/reopen; chỉ tạo đối tượng điều chỉnh mới. Rejected không hủy hoặc trình trực tiếp. Hồ sơ điều chỉnh Rejected vẫn chiếm vị trí đang xử lý của chain cho tới Approved hoặc Cancelled; không bỏ qua bằng cách lập hồ sơ thứ hai.
+`DEC-xxx` trong bảng là viết tắt của `PAY-DEC-xxx` trong sổ xác nhận. Approved không có đường sửa/hủy/reopen; chỉ tạo đối tượng điều chỉnh mới. Rejected không hủy hoặc trình trực tiếp. Hồ sơ điều chỉnh Rejected vẫn chiếm vị trí đang xử lý của chain cho tới Approved hoặc Cancelled; không bỏ qua bằng cách lập hồ sơ thứ hai. Căn cứ bổ sung hiện hành là PAY-DEC-015 sau R002-F001, không gán ngược cho PRM-006.
 
 ## 4. Luồng xử lý và lỗi
 
@@ -81,7 +83,30 @@ Duyệt kiểm tra nguồn trước transaction và kiểm lại quyền/version
 
 ### Điều chỉnh và giá trị hiện hành
 
-KTT tạo từ `currentApprovedDocumentId`, lưu `baseApprovedDocumentId`, đủ toàn bộ dòng/tổng mới, `delta = newOfficialTotal - baseOfficialTotal`. Một chain chỉ có một điều chỉnh chưa kết thúc. Trình dùng tổng mới đầy đủ và loại người lập gốc/người lập điều chỉnh; biên bản bắt buộc trước trình, và bắt buộc ngay khi dùng ngoại lệ hợp đồng đã kết thúc. Khi Approved, cập nhật con trỏ chain sang hồ sơ mới; không cộng các bản đầy đủ. Bản cũ giữ nguyên; khác biệt và căn cứ trước-sau đọc được. Hủy/từ chối không thay con trỏ hiệu lực; hủy điều chỉnh không giải phóng tháng của gốc.
+KTT tạo từ `currentApprovedDocumentId`, lưu `baseApprovedDocumentId`, đủ toàn bộ dòng/tổng mới, `delta = newOfficialTotal - baseOfficialTotal`. Một chain chỉ có một điều chỉnh Draft/PendingApproval/Rejected theo PAY-DEC-015. Kiểm `hasProcessingAdjustment()` trên toàn chuỗi, không dựa riêng trạng thái base/điều chỉnh cũ. Trình dùng tổng mới đầy đủ và loại người lập gốc/người lập điều chỉnh; biên bản bắt buộc trước trình, và bắt buộc ngay khi dùng ngoại lệ hợp đồng đã kết thúc. Khi Approved, cập nhật con trỏ chain sang hồ sơ mới; không cộng các bản đầy đủ. Bản cũ giữ nguyên; khác biệt và căn cứ trước-sau đọc được. Hủy/từ chối không thay con trỏ hiệu lực; hủy điều chỉnh không giải phóng tháng của gốc.
+
+### Bổ sung PAY-DEC-015: điều kiện toàn chuỗi
+
+| Trạng thái điều chỉnh đang xét | Giữ vị trí của chính hồ sơ? | Tạo điều chỉnh khác / bàn giao mới |
+| --- | --- | --- |
+| Draft | Có | Không tạo khác; tạm dừng bàn giao |
+| PendingApproval | Có | Không tạo khác; tạm dừng bàn giao |
+| Rejected | Có | Chỉ mở lại chính hồ sơ sang Draft để sửa/hủy; vẫn dừng bàn giao |
+| Approved | Không | Chỉ tạo tiếp từ bản Approved hiện hành khi toàn chuỗi không có điều chỉnh đang xử lý; bàn giao căn cứ mới đã duyệt khi điều kiện toàn chuỗi đạt |
+| Cancelled | Không | Không khôi phục; chỉ tạo mã mới nếu đủ điều kiện và toàn chuỗi không có điều chỉnh đang xử lý; bàn giao theo bản Approved hiện hành |
+
+Rejected → Draft vẫn giữ vị trí; Draft → Cancelled mới kết thúc vị trí của hồ sơ đó, giữ nguyên claim tháng gốc và bản Approved hiện hành. Nếu hồ sơ A đã Approved/Cancelled nhưng hồ sơ B đang xử lý thì vẫn chặn tạo C và dừng bàn giao mới. Đây là bổ sung F001/AC-US-PAY-04-04/05/06, không thêm trạng thái.
+
+### Bổ sung kiểm chứng F002: giữ nguyên nội dung khi nguồn lỗi/đổi
+
+| AC | Thời điểm/nhánh | Kết quả thiết kế |
+| --- | --- | --- |
+| AC-US-PAY-02-06 | Trình Draft lưu 100 triệu, nguồn đổi thành 110 triệu | 409 SOURCE_CHANGED; giữ Draft, revision/căn cứ và 100 triệu, báo diff; không tạo submission/outbox. Chỉ A04/A05 có chấp nhận chủ động mới thay tiền |
+| AC-US-PAY-02-07 | Trình khi nguồn không đọc được | 503 SOURCE_UNAVAILABLE; giữ Draft và tiền/căn cứ, nêu nguồn lỗi, không có PendingApproval |
+| AC-US-PAY-03-09 | Duyệt khi nguồn đổi ảnh hưởng/không còn hợp lệ | 409 SOURCE_CHANGED hoặc 422 SOURCE_INVALID; giữ PendingApproval và revision/căn cứ lần trình, thông báo trong phản hồi cho người đang được giao. Chỉ reject có lý do của người đó mới chuyển Rejected |
+| AC-US-PAY-03-10 | Duyệt khi nguồn không đọc được | 503 SOURCE_UNAVAILABLE; giữ PendingApproval và toàn bộ nội dung lần trình để chờ kiểm tra, không tự approve/reject |
+
+Thông báo lỗi nguồn ở đây là phản hồi/cảnh báo hiển thị cho người thao tác, không mặc định tạo thêm Notification yêu cầu duyệt hoặc vòng trình mới. Đây là truy vết bổ sung cho PAY-DEC-012 đã có.
 
 ## 5. UML và cách đọc
 

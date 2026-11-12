@@ -1,6 +1,6 @@
 @startuml
 title Payment-management - duyệt, từ chối và mở lại
-caption US-PAY-03; PAY-05..08; NFR-PAY-01; PAY-DEC-002/003/009/011/012/014. TO-BE đề xuất kỹ thuật.
+caption US-PAY-03; PAY-05..08; NFR-PAY-01; PAY-DEC-002/003/009/011/012/014. TO-BE đề xuất kỹ thuật.\nCập nhật 12/11/2026 theo BA R002 / PRM-012; Design Approved (PRM-013).
 skinparam defaultFontName Arial
 autonumber
 actor "Người đang được giao\nKTT/GĐKD theo tổng" as Reviewer
@@ -24,10 +24,10 @@ else đúng quyền và PendingApproval
     Source --> Service : hợp lệ không đổi / đổi ảnh hưởng / không đọc được
     alt nguồn đổi hoặc không còn hợp lệ
       Service --> Api : SOURCE_CHANGED / SOURCE_INVALID
-      Api --> Reviewer : 409/422, giữ chờ; cảnh báo và cho nhập lý do từ chối
+      Api --> Reviewer : 409/422; giữ PendingApproval, tiền/căn cứ lần trình\nCảnh báo người được giao; không tự sửa tiền/reject
     else nguồn không đọc được
       Service --> Api : SOURCE_UNAVAILABLE
-      Api --> Reviewer : 503, giữ PendingApproval; không tự reject
+      Api --> Reviewer : 503; giữ PendingApproval và nội dung lần trình\nChờ kiểm tra; không tự Approved/Rejected
     else nguồn hợp lệ không đổi
       group TX-DECIDE
         Service -> Repo : khóa chain/document/submission\nkiểm version, assignment hiện hành, độc lập
@@ -69,5 +69,7 @@ note over Reviewer,Repo
   Reassign A12 giữ role và submission, tăng assignmentVersion/documentVersion.
   Approve/reject/reassign đồng thời chỉ một kết quả hợp lệ sau khóa/version.
   Reject không cần đọc nguồn thành công nhưng bắt buộc lý do và độc lập.
+  AC-US-PAY-03-09/10: lỗi nguồn không đổi tiền/revision lần trình.
+  Điều chỉnh Rejected -> Draft vẫn giữ vị trí toàn chuỗi (PAY-DEC-015).
 end note
 @enduml

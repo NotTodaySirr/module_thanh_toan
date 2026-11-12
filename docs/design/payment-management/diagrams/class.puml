@@ -1,6 +1,6 @@
 @startuml
 title Payment-management - lớp nghiệp vụ và cổng ứng dụng (TO-BE)
-caption Nguồn: PDF trang 1-3, US-PAY-01..05, PAY-01..08, NFR-PAY-01/02; PAY-DEC-001..014.\nThiết kế kỹ thuật được người dùng phê duyệt (PRM-008).
+caption Nguồn: PDF trang 1-3, US-PAY-01..05, PAY-01..08, NFR-PAY-01/02; PAY-DEC-001..015.\nBản cập nhật theo BA R002; phê duyệt PRM-008 chỉ thuộc baseline lịch sử.\nCập nhật 12/11/2026 theo BA R002 / PRM-012; Design Approved (PRM-013).
 skinparam defaultFontName Arial
 skinparam classAttributeIconSize 0
 hide empty members
@@ -19,6 +19,7 @@ package "Nghiệp vụ" as Domain {
     +currentApprovedDocumentId: Id [0..1]
     +activeAdjustmentId: Id [0..1]
     +version: Integer
+    +hasProcessingAdjustment(): Boolean
     +reserveAdjustment(baseId: Id)
     +activateApproved(documentId: Id)
   }
@@ -167,7 +168,9 @@ NotificationDispatcher ..> NotificationChannel
 
 note bottom of PaymentChain
   Một Original; nhiều Adjustment nối tiếp.
-  Tối đa một điều chỉnh Draft/PendingApproval/Rejected.
+  PAY-DEC-015: tối đa một Draft/PendingApproval/Rejected.
+  Guard và cờ bàn giao xét TOÀN CHUỖI, kể cả xem bản cũ.
+  Approved/Cancelled chỉ kết thúc vị trí chính hồ sơ.
   Tổng hiệu lực lấy bản Approved hiện hành, không cộng các bản.
 end note
 note bottom of PaymentRevision

@@ -1,10 +1,12 @@
 # 08. Bàn giao cho Developer
 
 - Module: `payment-management`. Trạng thái: **Design Approved - Người dùng đã phê duyệt**.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok; Codex / System Design Agent.
-- Nguồn: [PDF](../../requirements/btcohong.pdf), [BA và 30 AC](../../analysis/payment-management/requirements-analysis.md), [PAY-DEC-001 đến PAY-DEC-014](../../analysis/payment-management/decisions.md).
-- Vòng review: chưa mở. Bàn giao thiết kế, chưa triển khai/chưa kiểm thử ứng dụng/chưa đo NFR.
+- Nguồn: [PDF](../../requirements/btcohong.pdf), [BA và 37 AC](../../analysis/payment-management/requirements-analysis.md), [PAY-DEC-001 đến PAY-DEC-015](../../analysis/payment-management/decisions.md).
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. Gói bàn giao và thứ tự triển khai đề xuất
 
@@ -31,7 +33,7 @@ Nếu tích hợp đòi hỏi thay đổi nghiệp vụ, thêm quyết định m
 
 ## 3. Kế hoạch kiểm chứng và kết quả mong đợi
 
-Mã T dưới đây là kế hoạch test của thiết kế, **chưa chạy trên ứng dụng**. Truy vết từng AC ở tài liệu 06. Test đồng thời phải dùng ít nhất hai kết nối/transaction thật, đồng bộ thời điểm qua barrier; chỉ test UI disable là không đủ.
+T01-T20 là các nhóm đã có; T21-T27 bổ sung mapping bảy AC mới sau R002. Mã T dưới đây là kế hoạch test của thiết kế, **chưa chạy trên ứng dụng**. Truy vết từng AC ở tài liệu 06. Test đồng thời phải dùng ít nhất hai kết nối/transaction thật, đồng bộ thời điểm qua barrier; chỉ test UI disable là không đủ.
 
 | Mã | Tình huống | Kết quả mong đợi theo quy tắc đã xác nhận |
 | --- | --- | --- |
@@ -55,16 +57,44 @@ Mã T dưới đây là kế hoạch test của thiết kế, **chưa chạy tr�
 | T18 | Lỗi audit/DB lúc lưu; đọc audit sau mọi lệnh; sửa quyền DB; tải biên bản trái quyền/metadata thiếu/blob mất | Không commit nghiệp vụ thiếu audit; append-only, đủ actor/time/diff; không đọc trái quyền; thiếu chứng cứ chặn trình/duyệt điều chỉnh; không lộ URL tùy ý |
 | T19 | Bàn giao trước duyệt; gửi lại Approved; điều chỉnh đang xử lý; kế toán đã nhận bản gốc | Không bàn giao trước Approved; cùng mã bảng/lần duyệt không tính hai lần; tạm dừng bàn giao mới khi có điều chỉnh chưa duyệt; KTT phối hợp thủ công, không sửa hóa đơn trong module |
 | T20 | Phép đo NFR-PAY-02 theo PAY-DEC-010 | Bộ 1 và 199 dòng trước tách, có 199→trên199; mỗi bộ ở tải 1 và 10 người, mỗi người 30 lượt trên kỳ chưa có bảng. Ghi mọi thời gian đầu-cuối gồm mạng/nguồn/lưu/render; mọi lượt thành công ≤3 giây, lỗi/timeout không đạt |
+| T21 | AC-US-PAY-04-04; xét riêng điều chỉnh Draft/PendingApproval/Rejected, kể cả xem bản Approved/Cancelled cũ | Mỗi trạng thái đều giữ vị trí toàn chuỗi, A10 chặn tạo khác; A02 trả activeAdjustmentId đúng hồ sơ và handoffBlockedByAdjustment=true; tạm dừng bàn giao mới, bản Approved hiện hành không đổi |
+| T22 | AC-US-PAY-04-05; Rejected → mở lại Draft → hủy có lý do; lập mới nếu đủ guard | Mở lại vẫn giữ vị trí/cờ dừng; cancel mới kết thúc vị trí hồ sơ đó, audit và giữ claim kỳ gốc/currentApproved. Không khôi phục Cancelled; nếu không còn hồ sơ khác đang xử lý, được tạo mã điều chỉnh mới từ Approved hiện hành và tiếp tục bàn giao thủ công |
+| T23 | AC-US-PAY-04-06; duyệt điều chỉnh A rồi tạo B; mở lại bản A hoặc Cancelled cũ để thử tạo C/đối chiếu bàn giao | Duyệt A dùng tổng/căn cứ mới, không cộng lặp; chỉ khi toàn chuỗi trống mới được tạo B. Khi B Draft/PendingApproval/Rejected, cờ vẫn true khi xem A, chặn C và dừng bàn giao mới; Approved/Cancelled cũ không bỏ qua guard toàn chuỗi |
+| T24 | AC-US-PAY-02-06; Draft 100 triệu, nguồn đổi ảnh hưởng thành 110 triệu rồi trình | 409 SOURCE_CHANGED và báo diff; giữ Draft/revision/căn cứ/100 triệu, không submission/outbox. Chỉ preview+accept chủ động mới đổi thành 110 triệu; trình ở lệnh sau |
+| T25 | AC-US-PAY-02-07; không đọc được nguồn trước trình | 503 SOURCE_UNAVAILABLE, nêu nguồn chưa kiểm tra được; giữ Draft, tiền/căn cứ/version tài chính, không PendingApproval hoặc submission/outbox |
+| T26 | AC-US-PAY-03-09; nguồn đổi ảnh hưởng hoặc invalid trước duyệt, xét riêng hai biến thể | 409 SOURCE_CHANGED hoặc 422 SOURCE_INVALID, cảnh báo người đang được giao; giữ PendingApproval và nội dung/tiền/snapshot lần trình. Không tự đổi tiền/reject; chỉ lệnh reject có lý do rồi reopen mới đi quy trình sửa |
+| T27 | AC-US-PAY-03-10; không đọc được nguồn trước duyệt | 503 SOURCE_UNAVAILABLE; giữ PendingApproval, submission Open và revision/tiền/căn cứ lần trình để chờ; không tự Approved/Rejected |
 
 Test T20 ghi cấu hình CPU/RAM/DB, phiên bản triển khai, topology/độ trễ/khả dụng nguồn, số dòng đầu vào/ra, concurrency và từng lần đo từ thao tác UI đến Draft đã lưu hiển thị. Không chỉ đo handler API, không dùng màn hình chờ làm điểm kết thúc. 200/trên200 dòng khảo sát riêng và không kết luận đạt SLA chưa được yêu cầu.
 
 ## 4. Điều kiện hoàn thành triển khai và review
 
-- Quy tắc/tên trạng thái/lớp/API/schema nhất quán, đủ 30 AC, 5 US, 8 PAY rule, 2 NFR và 14 PAY-DEC; tài liệu 06 ánh xạ đến T01-T20.
+- Quy tắc/tên trạng thái/lớp/API/schema nhất quán, đủ 37 AC, 5 US, 8 PAY rule, 2 NFR và 15 PAY-DEC; tài liệu 06 ánh xạ đến T01-T20.
 - Contract/integration/concurrency test chạy trên implementation/DB đã chọn; có báo cáo NFR với dữ liệu/môi trường thật; không dùng kiểm tra Markdown thay kết quả ứng dụng.
 - Tích hợp nguồn/quyền/biên bản/thông báo vượt qua DEP tương ứng; audit cùng transaction; dữ liệu Approved/revision bất biến; khôi phục được dữ liệu và không mất outbox sau restart.
-- Lưu baseline thiết kế trước R001, Reviewer đọc đúng commit, nhóm đánh giá findings, sau đó Design cập nhật mapping và revised commit khi được giao. Không tự tạo review hoặc điền đánh giá nhóm trong lượt này.
+- Giữ baseline thiết kế đã duyệt và hồ sơ review lịch sử; dùng bản BA đã đối chiếu R002 làm đầu vào hiện hành. Reviewer ở workflow mới chỉ review BA, không yêu cầu mở vòng review thiết kế. Nếu được giao lưu mốc thiết kế mới thì lưu riêng, không đổi baseline_commit/revised_commit của R002.
 
 ## 5. Kiểm tra thực tế của lượt Design
 
-Kết quả kiểm tra tài liệu và render được cập nhật tại cuối lượt trong [README](README.md) và PRM-007 ở [nhật ký prompt](../../process/prompt-log.md). Đây là tự kiểm tra của Design Agent, không là review độc lập/phê duyệt hoặc kết quả kiểm thử ứng dụng. Lượt soạn PRM-007 chưa tạo commit/baseline; việc lưu mốc được người dùng giao tại PRM-009, định danh bằng tag `payment-management-design-baseline-v1`. Commit `72ec6f0` có sẵn chỉ chứa hướng dẫn, không được dùng như baseline của bộ thiết kế này.
+Kết quả kiểm tra tài liệu và render được cập nhật tại cuối lượt trong [README](README.md) và PRM-007 ở [nhật ký prompt](../../process/prompt-log.md). PRM-012 cập nhật theo BA sau R002; kết quả kiểm tra mới được ghi riêng trong nhật ký, không nhận lại kết quả PRM-007 cho bản sửa. Đây là tự kiểm tra của Design Agent, không là review độc lập/phê duyệt hoặc kết quả kiểm thử ứng dụng. Lượt soạn PRM-007 chưa tạo commit/baseline; việc lưu mốc được người dùng giao tại PRM-009, định danh bằng tag `payment-management-design-baseline-v1`. Commit `72ec6f0` có sẵn chỉ chứa hướng dẫn, không được dùng như baseline của bộ thiết kế này.
+
+## 6. Báo cáo tác động và bàn giao cập nhật sau BA R002
+
+### 6.1 Cố định đầu vào và quyền quyết định
+
+- BA revised_commit: `fb1160f459da7c65e475651af3bba1dc6a0de477`; ba hồ sơ hiện hành đã đối chiếu văn bản bằng phiên bản tại commit này. Hồ sơ bằng chứng R002 được lưu tại `431f2ed` (Git history), không lẫn với mốc thiết kế.
+- Đã đọc [review-record](../../reviews/payment-management/R002/review-record.md), [findings](../../reviews/payment-management/R002/findings.md) mục 4, [đánh giá](../../reviews/payment-management/R002/team-evaluation.md) và [changes](../../reviews/payment-management/R002/changes.md). R002 Đã đối chiếu ở phạm vi BA; những đoạn chờ BA trong findings/team-evaluation được giữ như lịch sử theo review-record hiện hành, không tự sửa nhận xét của người khác.
+- PAY-DEC-015 xác nhận bổ sung bởi người dùng ngày 12/11/2026, PRM-011; F002 hoàn thiện AC theo PAY-DEC-012, không xác nhận lại nghiệp vụ. F003 Thừa, không tạo yêu cầu mới. Không còn câu hỏi nghiệp vụ chặn hai phần F001/F002.
+
+### 6.2 Kết luận đối chiếu thiết kế trước và sau
+
+| Đầu vào BA mới | Thiết kế trước đã có | Phần sửa/bổ sung cần bàn giao |
+| --- | --- | --- |
+| PAY-DEC-015; F001 | ADR-006, slot Draft/PendingApproval/Rejected; approve/cancel giải phóng, Approved bất biến | Dẫn căn cứ xác nhận mới, bảng đủ 5 trạng thái, giữ vị trí khi reopen và chỉ clear đúng hồ sơ; A02 đọc flag toàn chuỗi kể cả bản cũ; T21-T23 |
+| Bốn AC F002 | SourceGateway/snapshot; SOURCE_CHANGED/INVALID/UNAVAILABLE giữ đúng trạng thái | Mapping từng AC tới A06/A07, Q2/Q3, dữ liệu không đổi và T24-T27; ví dụ Draft 100 → nguồn 110, không tự tính lại |
+| 7 AC mới; tổng 37 | Ma trận chỉ liệt kê 30 AC cũ | Giữ mã cũ, thêm 7 dòng riêng và finding → quyết định → AC → API/UML/data → test; mở rộng bảng test lên 27 nhóm |
+| Workflow BA → review phân tích → BA sửa → Design | Metadata cũ vẫn chỉ đến PRM-006 và chờ review thiết kế | Dẫn BA revised_commit/R002, phân biệt phê duyệt baseline cũ với trạng thái Design Approved của bản cập nhật theo PRM-013 |
+
+Giữ 5 US/8 PAY rule/2 NFR, 19 endpoint, 5 trạng thái, 8 ADR, bộ entity và 5 DEP. Không cần thêm chức năng bàn giao kế toán, bảng/claim mới, module hoặc công nghệ. Bổ sung response A02 `activeAdjustmentId` để giải thích cờ đã có; không có request ghi mới. Không sửa đầu vào BA/PDF, R001/R002, hồ sơ mốc hoặc tag lịch sử; chưa tạo commit trong lượt này.
+
+Bản sửa đã được người dùng phê duyệt tại PRM-013 ngày 12/11/2026 sau khi đọc báo cáo tóm tắt; phê duyệt này được ghi nhận riêng với baseline cũ. Kiểm chứng tài liệu/render trong PRM-012 không thay test ứng dụng hoặc nghiệm thu NFR.

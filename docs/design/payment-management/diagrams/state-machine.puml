@@ -1,6 +1,6 @@
 @startuml
 title Payment-management - vòng đời một hồ sơ Original hoặc Adjustment
-caption Nguồn: PDF trang 1 mục 3; trang 2 US-PAY-01..05, PAY-04..08; PAY-DEC-001..014.\nTO-BE đề xuất kỹ thuật; vòng đời từng hồ sơ, không phải toàn chuỗi.
+caption Nguồn: PDF trang 1 mục 3; trang 2 US-PAY-01..05, PAY-04..08; PAY-DEC-001..015.\nTO-BE đề xuất kỹ thuật; vòng đời từng hồ sơ, không phải toàn chuỗi.\nCập nhật 12/11/2026 theo BA R002 / PRM-012; Design Approved (PRM-013).
 skinparam defaultFontName Arial
 hide empty description
 
@@ -17,13 +17,15 @@ PendingApproval : nguồn không đọc được / chờ kiểm tra lại
 PendingApproval : gửi lỗi hoặc retry / ghi lịch sử gửi
 PendingApproval --> Approved : approve [được giao, đúng role, độc lập,\nnguồn vẫn hợp lệ/không đổi ảnh hưởng]\n/ một kết quả, audit, cập nhật con trỏ chain
 PendingApproval --> Rejected : reject [được giao, độc lập, lý do không rỗng]\n/ giữ nội dung đã trình, audit
-Rejected --> Draft : reopen [phụ trách]\n/ sao chép revision mới, giữ tiền/lý do cũ, audit
+Rejected --> Draft : reopen [phụ trách]\n/ revision mới, giữ tiền/lý do cũ và vị trí điều chỉnh, audit
 Draft --> Cancelled : cancel [phụ trách, lý do không rỗng]\n/ audit, giải phóng claim gốc hoặc slot điều chỉnh
 
 Approved : createAdjustment [KTT, bản hiện hành, chưa có hồ sơ đang xử lý]
 Approved : / tạo ĐỐI TƯỢNG KHÁC ở Draft; giữ nguyên hồ sơ Approved này
+Approved : Hồ sơ điều chỉnh Approved kết thúc vị trí của chính nó
 Cancelled : Không phục hồi/sửa/trình chính hồ sơ này
-Cancelled : Có thể lập gốc mới mã khác nếu kiểm tra nguồn/kỳ hợp lệ
+Cancelled : Bảng gốc: có thể lập mã mới nếu nguồn/kỳ hợp lệ
+Cancelled : Điều chỉnh: kết thúc vị trí chính nó; không giải phóng kỳ gốc
 
 note right of Approved
   Không đặt Approved là final state tuyệt đối.
@@ -38,6 +40,9 @@ note left of Draft
 end note
 note bottom of Cancelled
   Hủy điều chỉnh không giải phóng tháng của gốc Approved.
-  Rejected phải reopen trước hủy hoặc trình lại.
+  PAY-DEC-015: Rejected vẫn giữ vị trí và dừng bàn giao.
+  Reopen không giải phóng vị trí; chỉ approve/cancel kết thúc.
+  Chỉ tạo tiếp/bàn giao khi TOÀN CHUỖI không còn
+  Draft/PendingApproval/Rejected; không suy từ bản cũ.
 end note
 @enduml

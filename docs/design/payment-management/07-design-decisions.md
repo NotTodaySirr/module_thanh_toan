@@ -1,14 +1,16 @@
 # 07. Quyết định thiết kế (ADR)
 
 - Module: `payment-management`. Trạng thái: **Design Approved - Người dùng đã phê duyệt**.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok; Codex / System Design Agent.
 - Nguồn: [PDF](../../requirements/btcohong.pdf), [BA](../../analysis/payment-management/requirements-analysis.md), [sổ xác nhận PAY-DEC](../../analysis/payment-management/decisions.md).
-- Vòng review: chưa mở. Tất cả ADR dưới đây là lựa chọn kỹ thuật do Design soạn trong thiết kế lần đầu và đã được người dùng trong phiên phê duyệt cùng bộ thiết kế tại PRM-008; không gán phê duyệt này cho thành viên hoặc tổ chức khác.
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. Quyền quyết định và căn cứ
 
-PAY-DEC-001 đến PAY-DEC-014 là quyết định **nghiệp vụ đã xác nhận** PRM-006. ADR không thay đổi ngưỡng, actor, reject, khóa kỳ, làm tròn hoặc giới hạn gửi lại; chỉ chọn cơ chế thực hiện. Không coi việc hoàn thiện ADR là phê duyệt của KTT/GĐKD, kết quả Reviewer hoặc bằng chứng chạy hệ thống.
+PAY-DEC-001..014 là quyết định **nghiệp vụ đã xác nhận** tại PRM-006; PAY-DEC-015 là xác nhận bổ sung qua R002-F001 ngày 12/11/2026. Bản ADR ban đầu đã được phê duyệt tại PRM-008; cập nhật căn cứ/diễn giải ADR-006 dưới đây đã được người dùng phê duyệt cùng bộ thiết kế tại PRM-013. ADR không thay đổi ngưỡng, actor, reject, khóa kỳ, làm tròn hoặc giới hạn gửi lại; chỉ chọn cơ chế thực hiện. Không coi việc hoàn thiện ADR là phê duyệt của KTT/GĐKD, kết quả Reviewer hoặc bằng chứng chạy hệ thống.
 
 ## 2. Danh mục ADR
 
@@ -19,7 +21,7 @@ PAY-DEC-001 đến PAY-DEC-014 là quyết định **nghiệp vụ đã xác nh�
 | ADR-003 | Tháng/quý, Cancelled cho lập mới, hai lập đồng thời | Unique theo type kỳ; kiểm tra query trước insert; claim từng tháng | MonthClaim PK(contractId,month), quý chèn 3 hàng trong một TX; xóa claim khi hủy gốc, giữ lịch sử qua document/audit | Dễ chứng minh chống chồng; cần toàn bộ tạo/hủy dùng cùng giao dịch; không được xóa claim Approved. Test quý-vs-tháng và rollback | PAY-01; PAY-DEC-004/007 |
 | ADR-004 | Retry mạng, bấm lặp, tranh chấp approve/reject/đổi người | UI disable; chỉ optimistic version; version + khóa + receipt | ETag/If-Match, khóa chain→document→submission, unique submission/revision và receipt key. PendingApproval submit trả lần hiện hành dù ETag cũ, vẫn kiểm quyền. Không tạo thông báo mới | Receipt tăng dữ liệu; quyền kiểm lại trước replay; deadlock cần lỗi kiểm soát. Test hai key/hai kết nối, mất phản hồi sau commit, đổi người cùng lúc quyết định | PAY-04/07/08; PAY-DEC-011/014 |
 | ADR-005 | DB commit thành công nhưng gửi lỗi hoặc worker chết | Gửi dưới transaction; gửi sau commit không lưu; transactional outbox | Lưu Notification trong TX-SUBMIT, worker đọc và gửi ngoài TX; retry ở +1/+5/+14 phút từ lỗi đầu, tối đa 3/15 phút; sau hạn chuyển vận hành. Check submission/assignment trước gửi | Có thể giao lặp nếu crash sau gửi; cùng reference giúp nhận biết. Không hứa exactly-once kênh ngoài; link luôn kiểm quyền hiện hành. Test crash/restart/lease/đổi người/quá hạn | US-PAY-02; PAY-DEC-014 |
-| ADR-006 | Approved bất biến nhưng cần chỉnh sai, không cộng lặp hoặc tự duyệt | Sửa trực tiếp; clone độc lập không liên kết; chuỗi có con trỏ | Original/Adjustment chung mô hình vòng đời, chain giữ bản Approved hiện hành + một slot điều chỉnh đang xử lý; lưu đầy đủ tổng mới và delta; người lập gốc/điều chỉnh đều bị loại duyệt | Rejected vẫn giữ slot tới hủy/duyệt; phải chặn stale base và update con trỏ cùng commit quyết định. Test 480→510 không thành 990, điều chỉnh giảm và nhiều lần nối tiếp | US-PAY-04; PAY-05/07; PAY-DEC-001/002/003/007/011/013 |
+| ADR-006 | Approved bất biến nhưng cần chỉnh sai, không cộng lặp hoặc tự duyệt | Sửa trực tiếp; clone độc lập không liên kết; chuỗi có con trỏ | Original/Adjustment chung mô hình vòng đời, chain giữ bản Approved hiện hành + một slot điều chỉnh đang xử lý; lưu đầy đủ tổng mới và delta; người lập gốc/điều chỉnh đều bị loại duyệt | Draft/PendingApproval/Rejected giữ vị trí; Approved/Cancelled chỉ kết thúc vị trí chính hồ sơ, vẫn xét toàn chuỗi khi tạo tiếp/bàn giao. Guard/con trỏ và flag đọc cùng snapshot; kiểm T21-T23 ngoài ví dụ 480→510 | US-PAY-04; PAY-05/07; PAY-DEC-001/002/003/007/011/013/015 |
 | ADR-007 | Biên bản là điều kiện nghiệp vụ; chưa có kho tài liệu thật | URL ngoài không kiểm soát; blob trong DB; EvidenceStore bất biến | Cổng kho nội bộ + metadata mã/ngày/các bên/checksum; PDF/PNG/JPEG ≤20 MiB là mặc định kỹ thuật upload, có thể đổi khi triển khai. Không tải URL tùy ý; blob ghi trước metadata, orphan xử lý vận hành | Cần DEP-03; lỗi kho chặn attach/trình/duyệt khi không xác minh được bằng chứng. Giới hạn dung lượng không là quy tắc trong PDF; không tự xây module tài liệu tổng quát | US-PAY-04; PAY-DEC-001/012 |
 | ADR-008 | Làm tròn và so ngưỡng phải nhất quán, dữ liệu đầu vào chưa biết độ lớn | Binary float; fixed decimal bị cắt; decimal chính xác | Arbitrary-precision decimal ở tính toán và NUMERIC chính xác ở kho; JSON số dạng string; giữ tích tối đa 12 số lẻ, HALF_UP dòng rồi cộng; hai tổng tách biệt | Cần kiểm thư viện/DB với dữ liệu nguồn thật; tránh overflow và quá 6 số lẻ. Không tự đặt trần giá trị nghiệp vụ. Test -0,4, ±0,5, hai dòng 100,5 và biên ngưỡng | PAY-03/04/06; PAY-DEC-008/009 |
 
@@ -27,6 +29,10 @@ PAY-DEC-001 đến PAY-DEC-014 là quyết định **nghiệp vụ đã xác nh�
 
 DEP-01..DEP-05 ở [bàn giao](08-handoff-to-developer.md) là đầu vào tích hợp/vận hành, không phải 14 lựa chọn nghiệp vụ cần phê duyệt lại. Khi có dữ liệu thực tế khác năng lực dự kiến, cập nhật adapter/ADR và kiểm tra tác động; chỉ mở quyết định nghiệp vụ mới khi thực sự đổi hành vi đã xác nhận. Không sửa ngược PRM-006 hoặc PDF.
 
-## 4. Mốc thiết kế và thay đổi sau này
+## 4. Mốc thiết kế và cập nhật sau review phân tích
 
-Đây là thiết kế lần chạy đầu; chưa có findings hoặc đánh giá nhóm. Lưu baseline Git chứa tám tài liệu và PlantUML trước khi mở R001; không lấy commit chỉ có hướng dẫn làm baseline. Lượt soạn PRM-007 chưa tạo commit; người dùng đã giao lưu baseline tại PRM-009, dùng tag `payment-management-design-baseline-v1` và ghi SHA đầy đủ trong hồ sơ mốc bằng commit kế tiếp. Khi được giao sửa sau review, đọc review-record/findings/team-evaluation của đúng vòng, sửa theo quyết định được chấp nhận và nối mapping changes; không sửa findings để làm thiết kế có vẻ đúng. SHA đầy đủ đặt trong hồ sơ review, không yêu cầu tài liệu chứa SHA của chính commit tạo ra nó.
+Baseline thiết kế đã duyệt tại PRM-008/009 giữ nguyên SHA `44c586c47105a9107af9673ff56604e83bd07ece` và tag `payment-management-design-baseline-v1`. R002 sau đó review **phân tích BA**; revised_commit BA là `fb1160f459da7c65e475651af3bba1dc6a0de477`, không phải thiết kế sửa và không dùng làm revised_commit của một vòng review thiết kế.
+
+Lượt PRM-012 tiếp nhận BA sửa và hồ sơ R002, mở rộng truy vết từ 30 lên 37 AC, thêm căn cứ PAY-DEC-015 cho ADR-006/guard chuỗi, làm rõ response A02 và bổ sung bảy kịch bản kiểm chứng. Không thêm ADR, module, endpoint hoặc trạng thái. Đây là cập nhật thiết kế, không thay findings/team-evaluation/changes của BA; mapping tác động nằm tại tài liệu 06 và 08.
+
+Workflow hiện hành không giao Reviewer review thiết kế; không yêu cầu mở vòng review thiết kế mới. Phê duyệt bản baseline giữ nguyên như bằng chứng lịch sử; bản cập nhật được người dùng phê duyệt riêng tại PRM-013. Không tạo commit hoặc đổi baseline/tag trong lượt rà soát này; chỉ lưu mốc thiết kế tiếp theo khi được giao. Nếu sau này có quyết định nghiệp vụ mới, nối thêm căn cứ và giữ nguyên lịch sử xác nhận.

@@ -1,10 +1,12 @@
 # 05. Thiết kế dữ liệu và giao dịch
 
 - Module: `payment-management`. Trạng thái: **Design Approved - Người dùng đã phê duyệt**.
-- Phê duyệt: người dùng trong phiên, 07/11/2026 (Asia/Bangkok), prompt “ok approve”; căn cứ PRM-008 trong [nhật ký prompt](../../process/prompt-log.md).
+- Phê duyệt bản cập nhật: người dùng trong phiên, 12/11/2026 (Asia/Bangkok), prompt “that is fine, change the status to approve”; căn cứ PRM-013 trong [nhật ký prompt](../../process/prompt-log.md).
+- Cập nhật: 12/11/2026, Asia/Bangkok; tiếp nhận BA sau review phân tích R002, PRM-012. Giữ nguyên baseline/tag lịch sử.
+- Phê duyệt lịch sử: bản baseline ngày 07/11/2026 được người dùng duyệt tại PRM-008; bản cập nhật ngày 12/11/2026 có xác nhận riêng tại PRM-013.
 - Ngày: 07/11/2026, Asia/Bangkok; Codex / System Design Agent.
-- Nguồn: [PDF](../../requirements/btcohong.pdf) trang 1 mục 1-3, trang 2 mục 4-5, trang 3 mục 6; [BA](../../analysis/payment-management/requirements-analysis.md); [PAY-DEC-001 đến PAY-DEC-014](../../analysis/payment-management/decisions.md).
-- Vòng review: chưa mở. Toàn bộ entity/field/constraint/index là **đề xuất thiết kế**, chưa có database hoặc migration được chạy.
+- Nguồn: [PDF](../../requirements/btcohong.pdf) trang 1 mục 1-3, trang 2 mục 4-5, trang 3 mục 6; [BA](../../analysis/payment-management/requirements-analysis.md); [PAY-DEC-001 đến PAY-DEC-015](../../analysis/payment-management/decisions.md).
+- Đầu vào review: [R002 - phân tích BA đã đối chiếu](../../reviews/payment-management/R002/review-record.md); nguồn BA tại revised_commit được ghi trong tài liệu bàn giao. Không thực hiện review mới trong lượt Design.
 
 ## 1. Kiểu và quan hệ logic
 
@@ -74,9 +76,9 @@ Thứ tự khóa thống nhất: receipt key → chain (nếu đã có) → docu
 | TX-CREATE | chain + gốc + revision/lines/snapshot + 1/3 claim + Created + receipt | Bất kỳ tháng bị chiếm → không có Draft dở dang; source lỗi trước TX không ghi claim |
 | TX-EDIT | document.currentRevision/version + revision/lines/snapshot nếu mới + audit + receipt; accept tiêu thụ candidate | Version/semantic hash đổi → không accept một phần; note edit giữ tiền/căn cứ |
 | TX-SUBMIT | submission + document.PendingApproval/currentSubmission/version + audit + Notification Queued + receipt | Lỗi bất kỳ ghi/audit → giữ Draft; nếu đã PendingApproval trả submission cũ không ghi outbox |
-| TX-DECIDE | submission kết quả + document status/version + audit + outbox Obsolete + receipt; Approved cập nhật chain.currentApproved, kết thúc activeAdjustment | Tranh chấp approve/reject/reassign chỉ một kết quả; nguồn không đọc được không vào TX quyết định |
+| TX-DECIDE | submission kết quả + document status/version + audit + outbox Obsolete + receipt; Approved điều chỉnh cập nhật chain.currentApproved và clear activeAdjustmentId chỉ nếu trỏ đúng hồ sơ đó; Rejected giữ vị trí | Tranh chấp approve/reject/reassign chỉ một kết quả; nguồn không đọc được không vào TX quyết định |
 | TX-STATE | Rejected→Draft + revision sao chép mới giữ tiền/căn cứ + version + audit + receipt | Tạo revision mới ngay lúc reopen dù chưa sửa; submission cũ vẫn tham chiếu revision cũ, unique(documentId,revisionId) không chặn round mới |
-| TX-CANCEL | Cancelled + version + lý do + audit + receipt; xóa claim gốc hoặc clear activeAdjustment | Chỉ Draft; mọi thay đổi giải phóng kỳ/slot cùng commit, không xóa nội dung cũ |
+| TX-CANCEL | Cancelled + version + lý do + audit + receipt; xóa claim gốc hoặc clear activeAdjustmentId chỉ nếu đang trỏ chính điều chỉnh bị hủy | Chỉ Draft; mọi thay đổi giải phóng kỳ/slot cùng commit, không xóa nội dung cũ |
 | TX-ADJUST | khóa chain + kiểm base hiện hành + Adjustment/revision/lines/snapshot + chain.activeAdjustmentId + audit + receipt | Hai create chỉ một slot; Reject không giải phóng slot, Cancel/Approve mới giải phóng |
 | TX-ASSIGN | phụ trách hoặc submission.assignedTo/assignmentVersion + document.version + AssignmentHistory + audit + receipt; đổi duyệt thêm outbox mới/dừng cũ | Người cũ hết quyền sau commit; root identity không đổi |
 | TX-EVIDENCE | metadata Evidence + EvidenceRegistered + receipt sau ghi blob bền vững | Blob có trước nhưng metadata thất bại → blob mồ côi chờ dọn, không được attach; blob mất → chặn trình/duyệt điều chỉnh |
@@ -91,3 +93,14 @@ Giá trị hiệu lực của chain = officialTotal ở `currentApprovedDocument
 Migration là **tạo mới** toàn bộ schema module vì chưa có DB thực tế; không có migration dữ liệu cũ đã xác định. Khi triển khai: xác minh khả năng NUMERIC/khóa/FK, tạo parent-child/index/role DB, kiểm thử rollback và quyền append-only, nạp dữ liệu phân quyền qua adapter; không import hoặc sửa dự án mẫu bên cạnh. Sau này có dữ liệu thật phải dùng migration tiến, backup/khôi phục và kiểm tra invariant trước phát hành; không xóa lịch sử để đổi kỳ hoặc hợp thức hóa Approved.
 
 DEP-05 phải có chính sách backup/khôi phục, retention và quyền quản trị audit/biên bản/idempotency trước production. Thiết kế không tự đặt số năm lưu hay tuyên bố đáp ứng pháp lý; không có yêu cầu nghiệp vụ nào được sửa để phù hợp schema.
+
+## 6. Bất biến toàn chuỗi theo PAY-DEC-015 / R002-F001
+
+Đặt `processingAdjustments` là tập mọi PaymentDocument kind=Adjustment thuộc chain có status Draft/PendingApproval/Rejected; số phần tử phải là 0 hoặc 1. `activeAdjustmentId` null khi tập rỗng, ngược lại bằng id phần tử duy nhất. `PaymentChain.hasProcessingAdjustment()` và cờ API handoffBlockedByAdjustment phải khớp tập này; không suy từ status của một hồ sơ Approved/Cancelled cũ.
+
+- TX-ADJUST khóa chain và kiểm tập toàn chuỗi trước tạo; chỉ tạo dựa currentApproved hiện hành, giữ nguyên claim tháng gốc.
+- TX-DECIDE reject và TX-STATE reopen giữ nguyên vị trí; reopen tạo revision mới nhưng không clear activeAdjustmentId.
+- TX-DECIDE approve Adjustment và TX-CANCEL Adjustment chỉ clear vị trí khi con trỏ khớp chính hồ sơ được xử lý. Trường hợp không khớp là lỗi invariant/transaction, rollback và theo dõi vận hành; không xóa vị trí của hồ sơ khác hoặc tự sửa lịch sử.
+- API A02 đọc chain và hồ sơ theo cùng snapshot nhất quán. Nếu có điều chỉnh mới B đang xử lý sau khi A Approved/Cancelled thì xem A vẫn phải trả activeAdjustmentId=B và cờ true. Cờ là suy diễn đọc, không thêm cột lưu trùng và không là khóa bàn giao ngoài module.
+
+Không thêm entity, trạng thái, claim hay migration dữ liệu so thiết kế cũ; diễn giải lại invariant/concurrency với căn cứ nghiệp vụ đã xác nhận. Bốn nhánh F002 thất bại giữ currentRevisionId, snapshot, totals và status; không tạo revision/submission/claim mới hoặc audit thay đổi thành công. Log lỗi kỹ thuật/cảnh báo được phép như tài liệu 02.

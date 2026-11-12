@@ -1,6 +1,6 @@
 @startuml
 title Payment-management - trình duyệt, chống trùng và gửi thông báo
-caption US-PAY-02; PAY-01/02/04/06/07; NFR-PAY-01; PAY-DEC-002/005/009/011/012/014. TO-BE đề xuất kỹ thuật.
+caption US-PAY-02; PAY-01/02/04/06/07; NFR-PAY-01; PAY-DEC-002/005/009/011/012/014. TO-BE đề xuất kỹ thuật.\nCập nhật 12/11/2026 theo BA R002 / PRM-012; Design Approved (PRM-013).
 skinparam defaultFontName Arial
 autonumber
 actor "Phụ trách\nNVKD/KTT điều chỉnh" as User
@@ -26,7 +26,7 @@ else Draft và version đúng
   Source --> Service : khác biệt ảnh hưởng / không đổi
   alt nguồn lỗi/đổi; thiếu dịch vụ; hai tổng không hợp lệ
     Service --> Api : SOURCE_CHANGED/UNAVAILABLE/INVALID\nMISSING_REQUIRED_SERVICE/NEGATIVE_TOTAL
-    Api --> User : 409/422/503; giữ Draft
+    Api --> User : 409/422/503; giữ Draft, revision/căn cứ và tiền cũ\nNguồn 100 -> 110: vẫn 100 cho tới preview/accept
   else căn cứ/tiền hợp lệ, điều chỉnh đủ biên bản
     Service -> Policy : select(officialTotal, unit, excludedSubjects)
     Policy --> Service : người được giao cùng role hoặc không có
@@ -51,6 +51,11 @@ else trạng thái khác hoặc version Draft cũ
   Service --> Api : INVALID_STATE / VERSION_CONFLICT
   Api --> User : 409 / 412; không thay đổi
 end
+
+note over Service,Repo
+  AC-US-PAY-02-06/07: bị chặn trước trình thì
+  không có submission/outbox mới, không tự cập nhật tiền.
+end note
 
 == Sau commit, xử lý nền độc lập phản hồi API ==
 Worker -> Repo : claim Notification đến hạn; kiểm submission/assignment hiện hành
