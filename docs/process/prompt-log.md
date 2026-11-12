@@ -276,6 +276,35 @@ Now help me change something: The AI reviewer role should be reviewing the outpu
 - Phạm vi bảo toàn: không sửa BA/PDF/thiết kế, hồ sơ baseline, vòng R001 đã có hoặc nhật ký trước PRM-010. Không tạo review mới, chạy review, stage/commit/push hoặc thay lịch sử Git.
 - Kiểm tra: rà soát diff và các chỉ dẫn Reviewer/baseline/handoff trong file hiện hành; kiểm tra nội dung, bảng Markdown và khoảng trắng. Đây là kiểm tra instructions, không phải review phân tích hay kiểm thử ứng dụng.
 
+## PRM-011 - BA chỉnh sửa phân tích theo review R002
+
+- Ngày theo phiên: 12/11/2026, Asia/Bangkok; không ghi giờ thao tác chưa được lưu.
+- Module/vai trò/vòng: `payment-management`, Codex / Business Analyst, xử lý sau review phân tích R002. Chưa có tên thành viên hoặc model được xác minh; không tự gán.
+- Prompt giao vai trò nguyên văn:
+
+```text
+confirm you role as A BA in the the module-thanh-toan file. Then, the current reviewer has produced a findings file, you iterate on your tasks based on that review. First, confirm your role and tasks to me
+```
+
+- Lượt đầu chỉ đọc hướng dẫn, findings và xác nhận vai trò/nhiệm vụ; chưa sửa tài liệu. Sau đó người dùng cho bắt đầu nguyên văn:
+
+```text
+ok proceed on your tasks
+```
+
+- Phạm vi đã xác nhận trước khi bắt đầu: sửa ba hồ sơ BA theo F001/F002 được chấp thuận, giữ quyết định cũ, cập nhật changes/nhật ký, kiểm nhất quán/diff, lưu phiên bản theo workflow rồi bàn giao Design. Giới hạn không commit của PRM-004 là lượt lịch sử cũ; lượt này thực hiện versioning-review theo nhiệm vụ được giao.
+- Đầu vào: AGENTS, README, ba rules, ba.md; ba hồ sơ BA hiện hành; findings/team-evaluation/changes/review-record R002. Đọc đủ ba trang PDF bằng pypdf, dùng PDF skill để render và mở ba PNG cục bộ. Không dùng thiết kế cũ để bổ sung căn cứ nghiệp vụ hoặc sửa PDF.
+- Git đầu lượt: HEAD `7a21fe7a75f6d3b9293dbfa52453305757394ffc`, index trống; docs/reviews/payment-management/ có sẵn nhưng chưa track, gồm R001 và R002. Snapshot 49 file nội dung trước sửa, lưu tại ../../tmp/ba-R002 tính từ repository root.
+- Căn cứ nghiệp vụ mới đã có: [findings R002](../reviews/payment-management/R002/findings.md) mục 4 ghi người dùng chấp thuận cả phân loại và phương án bằng “ok the proposal looks fine. Help me to write that down the findings file”. Đây là xác nhận được lưu từ lượt Reviewer, không tự tạo xác nhận mới hoặc gán cho KTT/GĐKD.
+- Phần AI sửa: requirements-analysis.md, issues.md, decisions.md; ghi PAY-DEC-015 bổ sung 001/003/007/013 theo F001; đồng bộ bảng năm trạng thái, giữ vị trí/tạo tiếp/mở-hủy và dừng/tiếp tục bàn giao; thêm AC-US-PAY-04-04 đến 06. F002 giữ PAY-DEC-012, thêm AC-US-PAY-02-06/07 và AC-US-PAY-03-09/10; đồng bộ mapping finding → quyết định/vấn đề → US → AC → kết quả mong đợi. Giữ nguyên 30 AC cũ, tổng 37.
+- Biên tập có căn cứ: A004 đổi nhãn loại thành “Chưa rõ cách kết hợp quy tắc”, giữ PAY-DEC-004. F003 vẫn Thừa; chỉ dùng tùy chọn đổi nhãn “Tóm lược phát biểu nguồn” khi biên tập, không thay nội dung nguồn/nghiệp vụ hoặc mở quyết định mới. Mục 6 lịch sử PRM-005 trong issues giữ nguyên.
+- Phần người dùng: giao việc và cho tiếp tục; đánh giá/phương án xử lý đã có tại findings mục 4. Chưa có bằng chứng người dùng/nhóm tự chỉnh file trong lượt này; AI không tự điền hoặc sửa đánh giá nhóm.
+- Kiểm tra thực tế: **25/25 kiểm tra tài liệu đạt**; đủ 5 US/8 PAY rule/2 NFR/37 AC; giữ 14 mã vấn đề và 14 dòng quyết định cũ, thêm PAY-DEC-015. Hai bảng trạng thái BA khớp bảng đã xác nhận; 7 AC mới có truy vết; liên kết file, bảng Markdown, Unicode và khoảng trắng không có lỗi. So hash xác nhận đúng phạm vi sửa và bảo toàn PDF/Design/instructions/R001/findings/team-evaluation. Script và JSON kết quả tạm tại ../../tmp/ba-R002/; không là bộ test ứng dụng.
+- Lỗi thao tác giới hạn: một tìm kiếm `rg` có đối số tmp không tồn tại dưới module, sau đó dùng đúng ../../tmp. Không có sửa file từ lỗi này; các kiểm tra cuối đã chạy trên đường dẫn đúng.
+- Phiên bản: commit BA thật `fb1160f459da7c65e475651af3bba1dc6a0de477`, chỉ ba hồ sơ phân tích. `git diff --stat/--numstat` từ baseline `44c586c47105a9107af9673ff56604e83bd07ece` đến revised_commit: 3 file, 146 dòng thêm/40 dòng xóa; `git diff --check` exit 0. Giữ danh tính Git sẵn có, không suy Git author là người phê duyệt nghiệp vụ.
+- Hồ sơ sau commit BA: cập nhật [changes R002](../reviews/payment-management/R002/changes.md) mapping đủ 17 nhận xét, review-record mục 5 và trường revised_commit, nhật ký này cùng hai dòng đóng góp thực tế trong task-allocation. Lưu commit hồ sơ R002/process riêng sau commit BA; đưa findings/team-evaluation có sẵn vào Git nguyên nội dung, không đưa R001 vào commit. Không sửa baseline, reset/rebase/amend hoặc push.
+- Kết quả bàn giao: R002 **Đã đối chiếu ở phạm vi BA**, không còn lựa chọn F001/F002 chờ xác nhận. Design nhận bản phân tích sửa và hồ sơ review để cập nhật bộ thiết kế theo requirements-analysis mục 9.4; phụ thuộc dữ liệu/nhân sự/quy trình/môi trường vẫn phải chuẩn bị. Chưa sửa Design/UML/API/schema, viết/chạy ứng dụng, đo hiệu năng, gửi thông báo hoặc bàn giao kế toán thực tế. Không coi lượt BA là review độc lập mới hoặc phê duyệt thiết kế.
+
 ## Mẫu cho lượt tiếp theo
 
 ### [PRM-xxx] - [Tên nhiệm vụ]
